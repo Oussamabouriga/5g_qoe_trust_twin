@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: 5g-qoe-trust-twin
+Version: 0.1.0
+Summary: Calibrated trace-driven digital twin for future 5G video QoE degradation forecasting
+Requires-Python: <3.12,>=3.11

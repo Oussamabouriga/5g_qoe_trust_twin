@@ -1,0 +1,20 @@
+openai:
+  api_key_environment_variable: "OPENAI_API_KEY"
+  model_environment_variable: "OPENAI_MODEL"
+  temperature: 0.0
+  maximum_retries: 3
+  timeout_seconds: 30
+
+explanation:
+  require_predicted_event: true
+  require_likely_causes: true
+  require_confidence: true
+  require_limitations: true
+  require_operator_checks: true
+  require_supporting_fields: true
+
+grounding:
+  reject_unsupported_numbers: true
+  reject_unknown_fields: true
+  reject_unsupported_causal_claims: true
+  reject_missing_required_sections: true

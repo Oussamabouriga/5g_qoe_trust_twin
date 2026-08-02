@@ -1,0 +1,36 @@
+dataset:
+  name: "5G-QoERA"
+  directory: "data/external/5G-QoERA/5G-QoERA"
+  file_pattern: "MOS_BS_*_Driver_PRB_*.tsv"
+  separator: "\t"
+
+video:
+  selected_bitrates_kbps:
+    - 2000
+    - 4000
+    - 6000
+    - 8000
+
+  bitrate_to_resolution:
+    2000: "720p"
+    4000: "1080p"
+    6000: "1080p"
+    8000: "1080p"
+
+sessions:
+  gap_threshold_seconds: 30
+
+target:
+  poor_mos_threshold: 3.0
+  horizon_steps: 1
+
+processing:
+  output_file: "data/processed/qoe_modeling_dataset.parquet"
+  sort_chronologically: true
+  preserve_original_files: true
+
+splitting:
+  method: "chronological_by_session"
+  train_fraction: 0.60
+  validation_fraction: 0.20
+  test_fraction: 0.20

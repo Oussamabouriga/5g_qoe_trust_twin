@@ -1,0 +1,13 @@
+trust:
+  confidence_weight: 0.40
+  validation_performance_weight: 0.30
+  calibration_weight: 0.20
+  data_quality_weight: 0.10
+
+levels:
+  high: 0.80
+  medium: 0.55
+
+abstention:
+  enabled: true
+  minimum_trust: 0.55

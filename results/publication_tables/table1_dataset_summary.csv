@@ -1,0 +1,4 @@
+Split,Rows,Sessions,Users,Poor QoE Rate
+Train,537504,51232,216,0.3018
+Validation,180224,17152,167,0.3735
+Test,179328,18144,181,0.4143

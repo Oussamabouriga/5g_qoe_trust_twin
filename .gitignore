@@ -1,0 +1,69 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Dataset
+data/external/
+data/raw/
+data/interim/
+data/processed/
+data/llm_evaluation/*.jsonl
+
+# Trained models
+models/**/*.joblib
+models/**/*.pkl
+models/**/*.json
+models/**/*.bin
+
+# Generated results
+results/figures/*
+results/tables/*
+results/metrics/*
+results/predictions/*
+results/evidence/*
+results/explanations/*
+
+# Keep empty folders
+!results/figures/.gitkeep
+!results/tables/.gitkeep
+!results/metrics/.gitkeep
+!results/predictions/.gitkeep
+!results/evidence/.gitkeep
+!results/explanations/.gitkeep
+
+# Report build files
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.bbl
+report/*.blg
+report/*.synctex.gz

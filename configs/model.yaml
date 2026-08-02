@@ -1,0 +1,28 @@
+experiment:
+  random_seed: 42
+
+target:
+  name: "future_poor_qoe"
+  mos_threshold: null
+  horizon_steps: null
+
+models:
+  persistence:
+    enabled: true
+
+  logistic_regression:
+    enabled: true
+    class_weight: "balanced"
+    max_iter: 2000
+
+  random_forest:
+    enabled: true
+    n_estimators: 300
+    max_depth: null
+    class_weight: "balanced"
+    n_jobs: -1
+
+calibration:
+  methods:
+    - "sigmoid"
+    - "isotonic"
