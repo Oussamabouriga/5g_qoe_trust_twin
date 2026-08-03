@@ -39,6 +39,28 @@ TARGET_COLUMN = "future_poor_qoe"
 RANDOM_SEED = 42
 
 
+def final_random_forest_artifact_path(
+    model_directory: Path = MODEL_DIRECTORY,
+) -> Path:
+    """Return the artifact path produced by final RF training."""
+    return (
+        model_directory
+        / "cross_layer_random_forest_final.joblib"
+    )
+
+
+def save_final_random_forest(
+    model: object,
+    model_directory: Path = MODEL_DIRECTORY,
+) -> Path:
+    """Persist the final RF to its contracted artifact path."""
+    artifact_path = final_random_forest_artifact_path(
+        model_directory
+    )
+    joblib.dump(model, artifact_path)
+    return artifact_path
+
+
 def clean_feature_lists(
     frame: pd.DataFrame,
 ) -> tuple[list[str], list[str], list[str]]:
@@ -321,10 +343,9 @@ def main() -> None:
         "cross_layer_random_forest"
     ] = forest_threshold
 
-    joblib.dump(
+    save_final_random_forest(
         random_forest,
-        MODEL_DIRECTORY
-        / "cross_layer_random_forest_final.joblib",
+        MODEL_DIRECTORY,
     )
 
     pd.DataFrame(forest_curve).to_csv(

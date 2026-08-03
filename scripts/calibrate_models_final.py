@@ -1,4 +1,4 @@
-"""Calibrate prototype model probabilities using chronological data."""
+"""Calibrate final model probabilities using chronological data."""
 
 from __future__ import annotations
 
@@ -35,6 +35,24 @@ METRIC_DIRECTORY = Path("results/metrics")
 PREDICTION_DIRECTORY = Path("results/predictions")
 
 TARGET_COLUMN = "future_poor_qoe"
+
+
+def required_final_random_forest_artifact_path(
+    model_directory: Path = MODEL_DIRECTORY,
+) -> Path:
+    """Return the required final RF path or fail closed."""
+    artifact_path = (
+        model_directory
+        / "cross_layer_random_forest_final.joblib"
+    )
+
+    if not artifact_path.is_file():
+        raise FileNotFoundError(
+            "Required final Random Forest artifact is missing: "
+            f"{artifact_path}"
+        )
+
+    return artifact_path
 
 
 def split_validation_chronologically(
@@ -186,6 +204,12 @@ def save_selection_predictions(
 
 def main() -> None:
     """Calibrate and compare model probabilities."""
+    final_random_forest_path = (
+        required_final_random_forest_artifact_path(
+            MODEL_DIRECTORY
+        )
+    )
+
     frame = pd.read_parquet(DATA_PATH)
 
     validation = frame[
@@ -217,13 +241,7 @@ def main() -> None:
             "features": network_features,
         },
         "cross_layer_random_forest": {
-            "path": (
-                MODEL_DIRECTORY
-                / (
-                    "cross_layer_random_forest"
-                    "_prototype.joblib"
-                )
-            ),
+            "path": final_random_forest_path,
             "features": cross_features,
         },
     }
