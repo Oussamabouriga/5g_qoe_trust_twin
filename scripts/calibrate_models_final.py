@@ -9,10 +9,17 @@ import joblib
 import numpy as np
 import pandas as pd
 
+from qoe_twin.artifact_lineage import (
+    load_resolved_configuration,
+    require_feature_columns,
+    validate_model_lineage,
+    write_calibrator_lineage,
+)
 from qoe_twin.calibration import (
     ProbabilityCalibrator,
     calibration_table,
 )
+from qoe_twin.config import LoadedConfiguration
 from qoe_twin.features import (
     get_cross_layer_feature_names,
     get_network_feature_names,
@@ -21,7 +28,6 @@ from qoe_twin.metrics import (
     classification_metrics,
     find_best_f1_threshold,
 )
-
 
 DATA_PATH = Path(
     "data/processed/qoe_features_final.parquet"
@@ -33,8 +39,39 @@ CALIBRATED_DIRECTORY = Path("models/calibrated")
 TABLE_DIRECTORY = Path("results/tables")
 METRIC_DIRECTORY = Path("results/metrics")
 PREDICTION_DIRECTORY = Path("results/predictions")
+CONFIG_DIRECTORY = Path("configs")
 
 TARGET_COLUMN = "future_poor_qoe"
+
+
+def save_final_random_forest_calibrator(
+    calibrator: ProbabilityCalibrator,
+    *,
+    calibration_method: str,
+    configuration: LoadedConfiguration,
+    numeric_features: list[str],
+    categorical_features: list[str],
+    parent_model_sha256: str,
+) -> Path:
+    """Save one supported final RF calibrator and its lineage sidecar."""
+    if calibration_method not in {"sigmoid", "isotonic"}:
+        raise ValueError(
+            "Final Random Forest calibrator method must be "
+            "'sigmoid' or 'isotonic'."
+        )
+    calibrator_path = CALIBRATED_DIRECTORY / (
+        "cross_layer_random_forest_"
+        f"{calibration_method}_final.joblib"
+    )
+    joblib.dump(calibrator, calibrator_path)
+    write_calibrator_lineage(
+        calibrator_path,
+        configuration=configuration,
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+        parent_model_sha256=parent_model_sha256,
+    )
+    return calibrator_path
 
 
 def required_final_random_forest_artifact_path(
@@ -104,18 +141,29 @@ def get_feature_lists(
     list[str],
     list[str],
 ]:
-    """Return network and cross-layer model feature lists."""
-    network_features = [
-        feature
-        for feature in get_network_feature_names()
-        if feature in frame.columns
-    ]
-
-    cross_features = [
+    """Return complete model feature lists or fail clearly."""
+    network_features = list(get_network_feature_names())
+    categorical_features = ["resolution"]
+    cross_numeric_features = [
         feature
         for feature in get_cross_layer_feature_names()
-        if feature in frame.columns
+        if feature not in categorical_features
     ]
+    cross_features = [
+        *cross_numeric_features,
+        *categorical_features,
+    ]
+
+    require_feature_columns(
+        frame.columns,
+        network_features,
+        context="final network calibration",
+    )
+    require_feature_columns(
+        frame.columns,
+        cross_features,
+        context="final Random Forest calibration",
+    )
 
     return network_features, cross_features
 
@@ -208,6 +256,22 @@ def main() -> None:
         required_final_random_forest_artifact_path(
             MODEL_DIRECTORY
         )
+    )
+
+    configuration = load_resolved_configuration(
+        CONFIG_DIRECTORY
+    )
+    categorical_features = ["resolution"]
+    cross_numeric_features = [
+        feature
+        for feature in get_cross_layer_feature_names()
+        if feature not in categorical_features
+    ]
+    model_lineage = validate_model_lineage(
+        final_random_forest_path,
+        configuration=configuration,
+        numeric_features=cross_numeric_features,
+        categorical_features=categorical_features,
     )
 
     frame = pd.read_parquet(DATA_PATH)
@@ -356,15 +420,26 @@ def main() -> None:
                 method
             ] = calibrated_probability
 
-            calibrator_path = (
-                CALIBRATED_DIRECTORY
-                / f"{model_name}_{method}_final.joblib"
-            )
-
-            joblib.dump(
-                calibrator,
-                calibrator_path,
-            )
+            if model_name == "cross_layer_random_forest":
+                save_final_random_forest_calibrator(
+                    calibrator,
+                    calibration_method=method,
+                    configuration=configuration,
+                    numeric_features=cross_numeric_features,
+                    categorical_features=categorical_features,
+                    parent_model_sha256=(
+                        model_lineage.artifact_sha256
+                    ),
+                )
+            else:
+                calibrator_path = (
+                    CALIBRATED_DIRECTORY
+                    / f"{model_name}_{method}_final.joblib"
+                )
+                joblib.dump(
+                    calibrator,
+                    calibrator_path,
+                )
 
         model_results = []
 

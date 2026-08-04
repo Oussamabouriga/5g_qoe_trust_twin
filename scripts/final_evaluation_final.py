@@ -16,6 +16,12 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
+from qoe_twin.artifact_lineage import (
+    load_resolved_configuration,
+    load_selected_final_calibrator,
+    require_feature_columns,
+    validate_prediction_chain,
+)
 from qoe_twin.evaluation import (
     build_reliability_table,
     evaluate_binary_predictions,
@@ -23,7 +29,7 @@ from qoe_twin.evaluation import (
     evaluate_trust_levels,
     lead_time_statistics,
 )
-
+from qoe_twin.features import get_cross_layer_feature_names
 
 FEATURE_PATH = Path(
     "data/processed/qoe_features_final.parquet"
@@ -38,6 +44,12 @@ MODEL_PATH = Path(
     "models/uncalibrated/"
     "cross_layer_random_forest_final.joblib"
 )
+CALIBRATED_DIRECTORY = Path("models/calibrated")
+CONFIGURATION_PATH = Path(
+    "results/metrics/"
+    "selected_calibration_configuration_final.json"
+)
+CONFIG_DIRECTORY = Path("configs")
 
 TABLE_DIRECTORY = Path("results/tables")
 FIGURE_DIRECTORY = Path("results/figures")
@@ -46,6 +58,17 @@ METRIC_DIRECTORY = Path("results/metrics")
 TARGET_COLUMN = "actual_future_poor_qoe"
 PREDICTION_COLUMN = "predicted_poor_qoe"
 PROBABILITY_COLUMN = "calibrated_probability"
+
+
+def final_random_forest_feature_lists() -> tuple[list[str], list[str]]:
+    """Return the exact ordered feature contract used by the final RF."""
+    categorical_features = ["resolution"]
+    numeric_features = [
+        feature
+        for feature in get_cross_layer_feature_names()
+        if feature not in categorical_features
+    ]
+    return numeric_features, categorical_features
 
 
 def json_default(value: Any) -> Any:
@@ -74,6 +97,20 @@ def load_evaluation_dataset() -> pd.DataFrame:
     predictions = pd.read_parquet(
         TRUSTED_PREDICTION_PATH
     )
+    require_feature_columns(
+        predictions.columns,
+        [
+            "session_id",
+            "user_id",
+            "timestamp",
+            TARGET_COLUMN,
+            PREDICTION_COLUMN,
+            PROBABILITY_COLUMN,
+            "abstain",
+            "trust_level",
+        ],
+        context="final evaluation predictions",
+    )
 
     feature_columns = [
         "session_id",
@@ -101,6 +138,11 @@ def load_evaluation_dataset() -> pd.DataFrame:
     features = pd.read_parquet(
         FEATURE_PATH,
         columns=feature_columns,
+    )
+    require_feature_columns(
+        features.columns,
+        feature_columns,
+        context="final evaluation features",
     )
 
     merged = predictions.merge(
@@ -497,6 +539,30 @@ def save_feature_importance() -> pd.DataFrame:
 
 def main() -> None:
     """Run and save the complete prototype evaluation."""
+    configuration = load_resolved_configuration(
+        CONFIG_DIRECTORY
+    )
+    (
+        calibration_method,
+        calibrator_path,
+        _,
+    ) = load_selected_final_calibrator(
+        CONFIGURATION_PATH,
+        CALIBRATED_DIRECTORY,
+    )
+    (
+        numeric_features,
+        categorical_features,
+    ) = final_random_forest_feature_lists()
+    validate_prediction_chain(
+        model_path=MODEL_PATH,
+        calibrator_path=calibrator_path,
+        prediction_path=TRUSTED_PREDICTION_PATH,
+        configuration=configuration,
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+    )
+
     TABLE_DIRECTORY.mkdir(
         parents=True,
         exist_ok=True,
@@ -690,7 +756,7 @@ def main() -> None:
         "model": (
             "cross_layer_random_forest"
         ),
-        "calibration": "isotonic",
+        "calibration": calibration_method,
         "overall_metrics": overall_metrics,
         "accepted_metrics": accepted_metrics,
         "trust_summary": trust_summary,

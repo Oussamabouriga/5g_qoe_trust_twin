@@ -2,13 +2,20 @@
 
 from __future__ import annotations
 
-import json
 from collections import defaultdict
 from pathlib import Path
 
 import joblib
 import pandas as pd
 
+from qoe_twin.artifact_lineage import (
+    load_resolved_configuration,
+    load_selected_final_calibrator,
+    require_feature_columns,
+    validate_calibrator_lineage,
+    validate_model_lineage,
+    write_prediction_lineage,
+)
 from qoe_twin.features import (
     get_cross_layer_feature_names,
 )
@@ -17,7 +24,6 @@ from qoe_twin.trust import (
     calculate_prediction_stability,
     calculate_trust,
 )
-
 
 DATA_PATH = Path(
     "data/processed/qoe_features_final.parquet"
@@ -28,10 +34,7 @@ MODEL_PATH = Path(
     "cross_layer_random_forest_final.joblib"
 )
 
-CALIBRATOR_PATH = Path(
-    "models/calibrated/"
-    "cross_layer_random_forest_isotonic_final.joblib"
-)
+CALIBRATED_DIRECTORY = Path("models/calibrated")
 
 CONFIGURATION_PATH = Path(
     "results/metrics/"
@@ -47,12 +50,70 @@ SUMMARY_PATH = Path(
     "results/tables/"
     "final_trust_summary.csv"
 )
+CONFIG_DIRECTORY = Path("configs")
 
 TARGET_COLUMN = "future_poor_qoe"
 
 
+def final_random_forest_feature_lists() -> tuple[list[str], list[str]]:
+    """Return the exact ordered feature contract used by the final RF."""
+    categorical_features = ["resolution"]
+    numeric_features = [
+        feature
+        for feature in get_cross_layer_feature_names()
+        if feature not in categorical_features
+    ]
+    return numeric_features, categorical_features
+
+
 def main() -> None:
     """Generate calibrated predictions, trust scores and abstentions."""
+    configuration_lineage = load_resolved_configuration(
+        CONFIG_DIRECTORY
+    )
+    (
+        calibration_method,
+        calibrator_path,
+        selected_configuration,
+    ) = load_selected_final_calibrator(
+        CONFIGURATION_PATH,
+        CALIBRATED_DIRECTORY,
+    )
+    decision_threshold = float(
+        selected_configuration["decision_threshold"]
+    )
+    validation_f1 = float(
+        selected_configuration["f1"]
+    )
+    validation_ece = float(
+        selected_configuration[
+            "expected_calibration_error"
+        ]
+    )
+    (
+        numeric_features,
+        categorical_features,
+    ) = final_random_forest_feature_lists()
+    feature_names = [
+        *numeric_features,
+        *categorical_features,
+    ]
+    model_lineage = validate_model_lineage(
+        MODEL_PATH,
+        configuration=configuration_lineage,
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+    )
+    calibrator_lineage = validate_calibrator_lineage(
+        calibrator_path,
+        configuration=configuration_lineage,
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+        expected_parent_model_sha256=(
+            model_lineage.artifact_sha256
+        ),
+    )
+
     frame = pd.read_parquet(DATA_PATH)
 
     test = frame[
@@ -64,34 +125,14 @@ def main() -> None:
         TARGET_COLUMN
     ].astype(int)
 
-    feature_names = [
-        feature
-        for feature in get_cross_layer_feature_names()
-        if feature in test.columns
-    ]
+    require_feature_columns(
+        test.columns,
+        feature_names,
+        context="final trusted prediction inference",
+    )
 
     model = joblib.load(MODEL_PATH)
-    calibrator = joblib.load(CALIBRATOR_PATH)
-
-    configuration = json.loads(
-        CONFIGURATION_PATH.read_text(
-            encoding="utf-8"
-        )
-    )["cross_layer_random_forest"]
-
-    decision_threshold = float(
-        configuration["decision_threshold"]
-    )
-
-    validation_f1 = float(
-        configuration["f1"]
-    )
-
-    validation_ece = float(
-        configuration[
-            "expected_calibration_error"
-        ]
-    )
+    calibrator = joblib.load(calibrator_path)
 
     test = test.sort_values(
         ["session_id", "timestamp"]
@@ -198,6 +239,16 @@ def main() -> None:
         OUTPUT_PATH,
         index=False,
     )
+    write_prediction_lineage(
+        OUTPUT_PATH,
+        configuration=configuration_lineage,
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+        parent_model_sha256=model_lineage.artifact_sha256,
+        parent_calibrator_sha256=(
+            calibrator_lineage.artifact_sha256
+        ),
+    )
 
     summary = (
         trusted.groupby(
@@ -287,9 +338,10 @@ def main() -> None:
         f"{accepted_accuracy:.4f}"
     )
 
-    print(f"\nSaved:")
+    print("\nSaved:")
     print(f"- {OUTPUT_PATH}")
     print(f"- {SUMMARY_PATH}")
+    print(f"- calibration method: {calibration_method}")
 
 
 if __name__ == "__main__":

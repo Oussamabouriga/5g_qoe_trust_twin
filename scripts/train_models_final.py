@@ -9,6 +9,11 @@ import joblib
 import numpy as np
 import pandas as pd
 
+from qoe_twin.artifact_lineage import (
+    load_resolved_configuration,
+    require_feature_columns,
+    write_model_lineage,
+)
 from qoe_twin.baselines import (
     CurrentQoEPersistenceBaseline,
 )
@@ -25,7 +30,6 @@ from qoe_twin.models import (
     build_network_logistic_regression,
 )
 
-
 DATA_PATH = Path(
     "data/processed/qoe_features_final.parquet"
 )
@@ -34,6 +38,7 @@ MODEL_DIRECTORY = Path("models/uncalibrated")
 RESULT_DIRECTORY = Path("results/metrics")
 TABLE_DIRECTORY = Path("results/tables")
 PREDICTION_DIRECTORY = Path("results/predictions")
+CONFIG_DIRECTORY = Path("configs")
 
 TARGET_COLUMN = "future_poor_qoe"
 RANDOM_SEED = 42
@@ -64,18 +69,9 @@ def save_final_random_forest(
 def clean_feature_lists(
     frame: pd.DataFrame,
 ) -> tuple[list[str], list[str], list[str]]:
-    """Return usable feature lists present in the dataset."""
-    network_features = [
-        feature
-        for feature in get_network_feature_names()
-        if feature in frame.columns
-    ]
-
-    cross_layer_features = [
-        feature
-        for feature in get_cross_layer_feature_names()
-        if feature in frame.columns
-    ]
+    """Return the complete required feature lists or fail clearly."""
+    network_features = list(get_network_feature_names())
+    cross_layer_features = list(get_cross_layer_feature_names())
 
     categorical_features = [
         feature
@@ -90,6 +86,17 @@ def clean_feature_lists(
         for feature in cross_layer_features
         if feature not in categorical_features
     ]
+
+    require_feature_columns(
+        frame.columns,
+        network_features,
+        context="final network model",
+    )
+    require_feature_columns(
+        frame.columns,
+        [*cross_numeric_features, *categorical_features],
+        context="final Random Forest",
+    )
 
     return (
         network_features,
@@ -156,6 +163,10 @@ def save_predictions(
 
 def main() -> None:
     """Train and evaluate all required prototype models."""
+    configuration = load_resolved_configuration(
+        CONFIG_DIRECTORY
+    )
+
     print(f"Reading {DATA_PATH}")
     frame = pd.read_parquet(DATA_PATH)
 
@@ -343,9 +354,15 @@ def main() -> None:
         "cross_layer_random_forest"
     ] = forest_threshold
 
-    save_final_random_forest(
+    random_forest_path = save_final_random_forest(
         random_forest,
         MODEL_DIRECTORY,
+    )
+    write_model_lineage(
+        random_forest_path,
+        configuration=configuration,
+        numeric_features=cross_numeric_features,
+        categorical_features=categorical_features,
     )
 
     pd.DataFrame(forest_curve).to_csv(
