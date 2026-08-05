@@ -46,7 +46,7 @@ def _synthetic_documents(*, resolved_model_target: bool = False) -> dict[str, An
                 "preserve_original_files": False,
             },
             "splitting": {
-                "method": "synthetic_temporal_split",
+                "method": "global_chronological",
                 "train_fraction": 0.6,
                 "validation_fraction": 0.2,
                 "test_fraction": 0.2,
@@ -70,11 +70,16 @@ def _synthetic_documents(*, resolved_model_target: bool = False) -> dict[str, An
                     "enabled": True,
                     "n_estimators": 17,
                     "max_depth": None,
+                    "min_samples_leaf": 2,
+                    "max_samples": 0.75,
                     "class_weight": "synthetic_balanced",
                     "n_jobs": 1,
                 },
             },
-            "calibration": {"methods": ["synthetic_a", "synthetic_b"]},
+            "calibration": {
+                "fit_fraction": 0.5,
+                "methods": ["sigmoid", "isotonic"],
+            },
         },
         "trust.yaml": {
             "trust": {
@@ -170,6 +175,12 @@ def test_loads_all_four_synthetic_files_and_distinguishes_unresolved_nulls(
         == BLOCKED_PENDING_ARTIFACTS
     )
     assert loaded.values["model"]["models"]["random_forest"]["max_depth"] is None
+    assert loaded.values["model"]["models"]["random_forest"][
+        "min_samples_leaf"
+    ] == 2
+    assert loaded.values["model"]["models"]["random_forest"][
+        "max_samples"
+    ] == 0.75
     assert loaded.canonical_json == canonical_json(loaded.values)
     assert loaded.sha256 == canonical_sha256(loaded.values)
     assert loaded.sha256 == hashlib.sha256(
@@ -254,6 +265,8 @@ abstention:
         ("model.yaml", ("experiment", "random_seed"), True),
         ("data.yaml", ("processing", "sort_chronologically"), 1),
         ("model.yaml", ("models", "random_forest", "n_estimators"), 4.5),
+        ("model.yaml", ("models", "random_forest", "min_samples_leaf"), 1.5),
+        ("model.yaml", ("models", "random_forest", "max_samples"), True),
     ],
 )
 def test_rejects_values_with_the_wrong_strict_type(
@@ -277,6 +290,10 @@ def test_rejects_values_with_the_wrong_strict_type(
     [
         ("data.yaml", ("target", "poor_mos_threshold"), 5.01),
         ("model.yaml", ("models", "random_forest", "n_jobs"), 0),
+        ("model.yaml", ("models", "random_forest", "min_samples_leaf"), 0),
+        ("model.yaml", ("models", "random_forest", "max_samples"), 0.0),
+        ("model.yaml", ("models", "random_forest", "max_samples"), 1.01),
+        ("model.yaml", ("calibration", "fit_fraction"), 1.0),
         ("trust.yaml", ("levels", "high"), 1.01),
         ("llm.yaml", ("openai", "temperature"), 2.01),
         ("llm.yaml", ("openai", "maximum_retries"), -1),
@@ -501,39 +518,78 @@ def test_known_agreement_is_blocked_when_report_is_blocked() -> None:
     assert not hasattr(record, "preferred_value")
 
 
-def test_differing_loaded_targets_are_reported_without_precedence(
+def test_loader_rejects_conflicting_target_definitions(
     tmp_path: Path,
 ) -> None:
     documents = _synthetic_documents(resolved_model_target=True)
     documents["data.yaml"]["target"]["poor_mos_threshold"] = 2.25
     documents["model.yaml"]["target"]["mos_threshold"] = 3.75
-    loaded = load_config_directory(_write_documents(tmp_path, documents))
 
-    data_value = loaded.values["data"]["target"]["poor_mos_threshold"]
-    model_value = loaded.values["model"]["target"]["mos_threshold"]
-    assert data_value == 2.25
-    assert model_value == 3.75
+    with pytest.raises(ConfigurationError, match="target MOS threshold"):
+        load_config_directory(_write_documents(tmp_path, documents))
 
-    (record,) = detect_conflicts(
-        {
-            "synthetic.target.mos_threshold": {
-                "data_yaml": data_value,
-                "model_yaml": model_value,
-                "report": 4.5,
-            }
-        },
-        required_sources=("data_yaml", "model_yaml", "report"),
-    )
 
-    assert record.status is ConflictStatus.CONFLICT
-    assert _observation_values(record) == {
-        "data_yaml": 2.25,
-        "model_yaml": 3.75,
-        "report": 4.5,
+def test_loader_rejects_conflicting_target_horizons(tmp_path: Path) -> None:
+    documents = _synthetic_documents(resolved_model_target=True)
+    documents["model.yaml"]["target"]["horizon_steps"] = 4
+
+    with pytest.raises(ConfigurationError, match="target horizon_steps"):
+        load_config_directory(_write_documents(tmp_path, documents))
+
+
+@pytest.mark.parametrize(
+    "methods",
+    [
+        ["sigmoid"],
+        ["isotonic", "sigmoid"],
+        ["sigmoid", "isotonic", "unknown"],
+    ],
+)
+def test_loader_rejects_nonfrozen_calibration_candidates(
+    tmp_path: Path,
+    methods: list[str],
+) -> None:
+    documents = _synthetic_documents()
+    documents["model.yaml"]["calibration"]["methods"] = methods
+
+    with pytest.raises(ConfigurationError, match="calibration.methods"):
+        load_config_directory(_write_documents(tmp_path, documents))
+
+
+def test_repository_configuration_freezes_cp5_experiment() -> None:
+    repository_root = Path(__file__).resolve().parents[1]
+    loaded = load_config_directory(repository_root / "configs")
+
+    assert loaded.unresolved_paths == ()
+    assert loaded.values["data"]["target"] == {
+        "horizon_steps": 1,
+        "poor_mos_threshold": 3.0,
     }
-    assert not hasattr(record, "selected_value")
-    assert not hasattr(record, "resolved_value")
-    assert not hasattr(record, "preferred_value")
+    assert loaded.values["model"]["target"] == {
+        "horizon_steps": 1,
+        "mos_threshold": 3.0,
+        "name": "future_poor_qoe",
+    }
+    assert loaded.values["data"]["splitting"] == {
+        "method": "global_chronological",
+        "test_fraction": 0.2,
+        "train_fraction": 0.6,
+        "validation_fraction": 0.2,
+    }
+    assert loaded.values["model"]["experiment"]["random_seed"] == 42
+    assert loaded.values["model"]["models"]["random_forest"] == {
+        "class_weight": "balanced_subsample",
+        "enabled": True,
+        "max_depth": 14,
+        "max_samples": 0.5,
+        "min_samples_leaf": 20,
+        "n_estimators": 100,
+        "n_jobs": 4,
+    }
+    assert loaded.values["model"]["calibration"] == {
+        "fit_fraction": 0.5,
+        "methods": ("sigmoid", "isotonic"),
+    }
 
 
 def test_conflict_detection_is_independent_of_input_order() -> None:

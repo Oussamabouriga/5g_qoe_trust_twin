@@ -28,6 +28,7 @@ from qoe_twin.metrics import (
     classification_metrics,
     find_best_f1_threshold,
 )
+from qoe_twin.splitting import split_validation_chronologically
 
 DATA_PATH = Path(
     "data/processed/qoe_features_final.parquet"
@@ -40,9 +41,6 @@ TABLE_DIRECTORY = Path("results/tables")
 METRIC_DIRECTORY = Path("results/metrics")
 PREDICTION_DIRECTORY = Path("results/predictions")
 CONFIG_DIRECTORY = Path("configs")
-
-TARGET_COLUMN = "future_poor_qoe"
-
 
 def save_final_random_forest_calibrator(
     calibrator: ProbabilityCalibrator,
@@ -90,49 +88,6 @@ def required_final_random_forest_artifact_path(
         )
 
     return artifact_path
-
-
-def split_validation_chronologically(
-    validation: pd.DataFrame,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Split validation into calibration and threshold-selection periods.
-    """
-    timestamps = (
-        validation["timestamp"]
-        .drop_duplicates()
-        .sort_values()
-        .reset_index(drop=True)
-    )
-
-    midpoint = timestamps.iloc[
-        len(timestamps) // 2
-    ]
-
-    calibration = validation[
-        validation["timestamp"] < midpoint
-    ].copy()
-
-    selection = validation[
-        validation["timestamp"] >= midpoint
-    ].copy()
-
-    if calibration.empty or selection.empty:
-        raise ValueError(
-            "Calibration and selection periods "
-            "must both contain observations."
-        )
-
-    if (
-        calibration["timestamp"].max()
-        >= selection["timestamp"].min()
-    ):
-        raise ValueError(
-            "Calibration and threshold-selection "
-            "periods overlap."
-        )
-
-    return calibration, selection
 
 
 def get_feature_lists(
@@ -211,6 +166,8 @@ def save_selection_predictions(
     calibration_method: str,
     probability: np.ndarray,
     threshold: float,
+    *,
+    target_column: str,
 ) -> None:
     """Save probabilities and decisions."""
     output = selection[
@@ -220,7 +177,7 @@ def save_selection_predictions(
             "timestamp",
             "future_timestamp",
             "prediction_lead_seconds",
-            TARGET_COLUMN,
+            target_column,
         ]
     ].copy()
 
@@ -273,21 +230,42 @@ def main() -> None:
         numeric_features=cross_numeric_features,
         categorical_features=categorical_features,
     )
+    model_configuration = configuration.values["model"]
+    target_column = str(
+        model_configuration["target"]["name"]
+    )
+    calibration_configuration = model_configuration[
+        "calibration"
+    ]
+    calibration_methods = list(
+        calibration_configuration["methods"]
+    )
+    calibration_fraction = float(
+        calibration_configuration["fit_fraction"]
+    )
+    random_seed = int(
+        model_configuration["experiment"]["random_seed"]
+    )
 
-    frame = pd.read_parquet(DATA_PATH)
+    frame = pd.read_parquet(
+        DATA_PATH,
+        filters=[("split", "==", "validation")],
+    )
 
     validation = frame[
         frame["split"].eq("validation")
-        & frame[TARGET_COLUMN].notna()
+        & frame[target_column].notna()
     ].copy()
 
-    validation[TARGET_COLUMN] = (
-        validation[TARGET_COLUMN].astype(int)
+    validation[target_column] = (
+        validation[target_column].astype(int)
     )
 
     calibration_frame, selection_frame = (
         split_validation_chronologically(
-            validation
+            validation,
+            calibration_fraction=calibration_fraction,
+            target_column=target_column,
         )
     )
 
@@ -328,11 +306,11 @@ def main() -> None:
     )
 
     y_calibration = calibration_frame[
-        TARGET_COLUMN
+        target_column
     ].to_numpy()
 
     y_selection = selection_frame[
-        TARGET_COLUMN
+        target_column
     ].to_numpy()
 
     result_rows: list[dict] = []
@@ -391,18 +369,12 @@ def main() -> None:
         probability_variants: dict[
             str,
             np.ndarray,
-        ] = {
-            "uncalibrated": (
-                raw_selection_probability
-            )
-        }
+        ] = {}
 
-        for method in [
-            "sigmoid",
-            "isotonic",
-        ]:
+        for method in calibration_methods:
             calibrator = ProbabilityCalibrator(
-                method=method
+                method=method,
+                random_seed=random_seed,
             )
 
             calibrator.fit(
@@ -484,6 +456,7 @@ def main() -> None:
                 calibration_method=method,
                 probability=probability,
                 threshold=threshold,
+                target_column=target_column,
             )
 
         best = min(
@@ -579,9 +552,13 @@ def main() -> None:
         / "selected_calibration_configuration_final.json"
     )
 
+    selection_document = {
+        "configuration_sha256": configuration.sha256,
+        **selected_configuration,
+    }
     selection_path.write_text(
         json.dumps(
-            selected_configuration,
+            selection_document,
             indent=2,
         ),
         encoding="utf-8",
@@ -608,7 +585,7 @@ def main() -> None:
     print("\nSelected configurations:")
     print(
         json.dumps(
-            selected_configuration,
+            selection_document,
             indent=2,
         )
     )

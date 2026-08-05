@@ -78,6 +78,7 @@ def main() -> None:
     ) = load_selected_final_calibrator(
         CONFIGURATION_PATH,
         CALIBRATED_DIRECTORY,
+        configuration=configuration_lineage,
     )
     decision_threshold = float(
         selected_configuration["decision_threshold"]

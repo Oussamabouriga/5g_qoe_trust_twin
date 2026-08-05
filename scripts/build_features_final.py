@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from qoe_twin.artifact_lineage import load_resolved_configuration
 from qoe_twin.features import (
     build_temporal_features,
     get_cross_layer_feature_names,
@@ -20,7 +21,6 @@ from qoe_twin.splitting import (
     validate_split_order,
 )
 
-
 PROTOTYPE_INPUT = Path(
     "data/processed/qoe_modeling_final_sample.parquet"
 )
@@ -28,6 +28,7 @@ PROTOTYPE_INPUT = Path(
 FULL_INPUT = Path(
     "data/processed/qoe_modeling_dataset.parquet"
 )
+CONFIG_DIRECTORY = Path("configs")
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -44,6 +45,12 @@ def parse_arguments() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_arguments()
+    configuration = load_resolved_configuration(
+        CONFIG_DIRECTORY
+    )
+    split_configuration = configuration.values[
+        "data"
+    ]["splitting"]
 
     input_path = FULL_INPUT if args.full else PROTOTYPE_INPUT
 
@@ -73,8 +80,14 @@ def main() -> None:
 
     boundaries = calculate_time_boundaries(
         featured,
-        train_fraction=0.60,
-        validation_fraction=0.20,
+        train_fraction=float(
+            split_configuration["train_fraction"]
+        ),
+        validation_fraction=float(
+            split_configuration[
+                "validation_fraction"
+            ]
+        ),
     )
 
     featured = assign_chronological_split(
@@ -121,14 +134,6 @@ def main() -> None:
             users=("user_id", "nunique"),
             start_time=("timestamp", "min"),
             end_time=("timestamp", "max"),
-            poor_qoe_rate=(
-                "future_poor_qoe",
-                lambda values: values.astype(float).mean(),
-            ),
-            median_lead_seconds=(
-                "prediction_lead_seconds",
-                "median",
-            ),
         )
         .reset_index()
     )
@@ -157,6 +162,15 @@ def main() -> None:
         "rows_removed_at_boundaries": rows_removed,
         "train_end": boundaries.train_end.isoformat(),
         "validation_end": boundaries.validation_end.isoformat(),
+        "configuration_sha256": configuration.sha256,
+        "split_method": split_configuration["method"],
+        "split_fractions": {
+            "train": split_configuration["train_fraction"],
+            "validation": split_configuration[
+                "validation_fraction"
+            ],
+            "test": split_configuration["test_fraction"],
+        },
         "network_features": get_network_feature_names(),
         "cross_layer_features": get_cross_layer_feature_names(),
     }

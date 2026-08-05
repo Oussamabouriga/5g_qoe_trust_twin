@@ -66,11 +66,19 @@ def _write_bytes(path: Path, content: bytes) -> Path:
     return path
 
 
-def _write_selected_configuration(path: Path, method: str) -> Path:
+def _write_selected_configuration(
+    path: Path,
+    method: str,
+    configuration: LoadedConfiguration | None = None,
+) -> Path:
+    effective_configuration = configuration or _configuration()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(
             {
+                "configuration_sha256": resolved_configuration_sha256(
+                    effective_configuration
+                ),
                 "cross_layer_random_forest": {
                     "calibration_method": method,
                     "decision_threshold": 0.4,

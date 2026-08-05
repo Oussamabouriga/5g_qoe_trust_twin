@@ -16,12 +16,13 @@ class ProbabilityCalibrator:
 
     method: str
     model: object | None = None
+    random_seed: int = 42
 
     def fit(
         self,
         raw_probability: np.ndarray,
         target: np.ndarray,
-    ) -> "ProbabilityCalibrator":
+    ) -> ProbabilityCalibrator:
         """Fit the selected calibration method."""
         probability = np.asarray(
             raw_probability,
@@ -36,7 +37,7 @@ class ProbabilityCalibrator:
         if self.method == "sigmoid":
             model = LogisticRegression(
                 solver="lbfgs",
-                random_state=42,
+                random_state=self.random_seed,
             )
 
             model.fit(

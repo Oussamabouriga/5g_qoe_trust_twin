@@ -371,6 +371,11 @@ _OPEN_UNIT_INTERVAL = _number(
     minimum_inclusive=False,
     maximum_inclusive=False,
 )
+_POSITIVE_UNIT_INTERVAL = _number(
+    minimum=0.0,
+    maximum=1.0,
+    minimum_inclusive=False,
+)
 _MOS_VALUE = _number(minimum=1.0, maximum=5.0)
 
 _DATA_SCHEMA = _mapping(
@@ -420,7 +425,10 @@ _DATA_SCHEMA = _mapping(
 _MODEL_SCHEMA = _mapping(
     {
         "calibration": _mapping(
-            {"methods": _list_of(_nonempty_string, unique=True)}
+            {
+                "fit_fraction": _OPEN_UNIT_INTERVAL,
+                "methods": _list_of(_nonempty_string, unique=True),
+            }
         ),
         "experiment": _mapping(
             {"random_seed": _integer(minimum=0, maximum=_UINT32_MAX)}
@@ -440,6 +448,8 @@ _MODEL_SCHEMA = _mapping(
                         "class_weight": _nonempty_string,
                         "enabled": _boolean,
                         "max_depth": _nullable(_POSITIVE_INTEGER),
+                        "max_samples": _nullable(_POSITIVE_UNIT_INTERVAL),
+                        "min_samples_leaf": _POSITIVE_INTEGER,
                         "n_estimators": _POSITIVE_INTEGER,
                         "n_jobs": _integer(forbidden=frozenset({0})),
                     }
@@ -545,6 +555,10 @@ def _validate_cross_field_constraints(values: Mapping[str, Any]) -> None:
         )
 
     splitting = data["splitting"]
+    if splitting["method"] != "global_chronological":
+        raise ConfigurationError(
+            "data.splitting.method must be 'global_chronological'."
+        )
     split_sum = sum(
         splitting[name]
         for name in (
@@ -560,6 +574,36 @@ def _validate_cross_field_constraints(values: Mapping[str, Any]) -> None:
         abs_tol=_SUM_TOLERANCE,
     ):
         raise ConfigurationError("data.splitting fractions must sum to 1.0.")
+
+    model = values["model"]
+    model_target = model["target"]
+    target_pairs = (
+        (
+            "horizon_steps",
+            data["target"]["horizon_steps"],
+            model_target["horizon_steps"],
+        ),
+        (
+            "MOS threshold",
+            data["target"]["poor_mos_threshold"],
+            model_target["mos_threshold"],
+        ),
+    )
+    for label, data_value, model_value in target_pairs:
+        if (
+            model_value != BLOCKED_PENDING_ARTIFACTS
+            and data_value != model_value
+        ):
+            raise ConfigurationError(
+                f"Data and model target {label} values must match."
+            )
+
+    calibration_methods = tuple(model["calibration"]["methods"])
+    if calibration_methods != ("sigmoid", "isotonic"):
+        raise ConfigurationError(
+            "model.calibration.methods must be exactly "
+            "['sigmoid', 'isotonic'] in that order."
+        )
 
     trust = values["trust"]
     weight_sum = sum(trust["trust"].values())

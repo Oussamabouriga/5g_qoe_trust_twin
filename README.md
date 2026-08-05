@@ -1,6 +1,6 @@
 # Trust-Aware 5G QoE Digital Twin
 
-A research prototype for the **early prediction of video-streaming Quality of Experience (QoE) degradation in 5G New Radio environments**.
+A research prototype for **next-observation poor-QoE forecasting in 5G New Radio video streaming**.
 
 The project combines chronological session replay, Digital Twin state reconstruction, temporal and cross-layer feature engineering, future poor-QoE prediction, probability calibration, trust scoring and selective abstention, OpenAI-based structured explanations, schema validation, grounding validation, and publication-ready evaluation outputs.
 
@@ -11,7 +11,7 @@ The project combines chronological session replay, Digital Twin state reconstruc
 
 The system addresses the following research question:
 
-> Can a chronological, trust-aware Digital Twin anticipate future poor video-streaming QoE in a 5G environment while producing calibrated probabilities, abstaining from unreliable predictions, and generating evidence-grounded operator explanations?
+> Can a chronological, trust-aware Digital Twin forecast poor video-streaming QoE at the next observed row while producing calibrated probabilities, abstaining from unreliable predictions, and generating evidence-grounded operator explanations?
 
 ```text
 5G-QoERA dataset
@@ -47,7 +47,11 @@ Accepted or rejected explanation
 
 ---
 
-## 2. Main results
+## 2. Historical submitted results (superseded)
+
+> The values below belong to the pre-correction submission and are not results
+> of the frozen CP5 experiment. They must not be used as evidence for the
+> corrected pipeline. CP8 will replace them after one untouched-test run.
 
 The final resource-safe sample contains **994,496 rows** and preserves complete sessions across all base stations, Physical Resource Block allocations, and selected video bitrates.
 
@@ -380,7 +384,7 @@ This stage:
 5. creates session identifiers;
 6. sorts observations chronologically;
 7. creates future poor-QoE labels;
-8. calculates prediction lead time;
+8. records the elapsed time to the next observation;
 9. writes the processed dataset.
 
 Output:
@@ -391,7 +395,12 @@ data/processed/qoe_modeling_dataset.parquet
 
 The complete long-format dataset contains approximately 16.59 million observations.
 
-> **Documentation TODO:** add the exact MOS threshold used to define `future_poor_qoe` after confirming it from the implementation.
+The target is **next-observation poor-QoE forecasting**. For each row, the
+future row is the immediately following observation in the same session. The
+label is one exactly when that future MOS is strictly below `3.0`; MOS `3.0`
+is not poor QoE. The horizon is one observation, so the elapsed time can vary.
+This is neither degradation-onset detection nor a fixed-ten-second warning;
+already-poor to poor transitions remain positive examples.
 
 ---
 
@@ -435,7 +444,7 @@ This stage:
 - replays observations chronologically;
 - computes lag and past-only rolling features;
 - derives mobility, capacity, packet-loss, and MOS features;
-- performs chronological train/validation/test splitting;
+- performs a global timestamp-based 60/20/20 train/validation/test split;
 - removes targets crossing split boundaries.
 
 Outputs:
@@ -466,11 +475,12 @@ Outputs:
 
 ```text
 models/uncalibrated/
-results/tables/final_model_comparison.csv
 results/metrics/final_training_metadata.json
 ```
 
-The cross-layer Random Forest is selected as the final model.
+The learned estimators and preprocessing pipelines are fitted only on training
+rows. This stage does not inspect validation or test outcomes and does not
+select decision thresholds. Validation roles are reserved for calibration.
 
 ---
 
@@ -482,17 +492,14 @@ python scripts/calibrate_models_final.py
 
 Compared methods:
 
-- uncalibrated;
 - sigmoid;
 - isotonic.
 
-Selected final configuration:
-
-```text
-Cross-layer Random Forest
-Calibration: isotonic
-Decision threshold: 0.38
-```
+The validation partition is divided chronologically. Its first half fits both
+calibrators, after removing labels that cross the internal midpoint. Its second
+half selects the calibration method and decision threshold. The test partition
+remains sealed until the single CP8 final run. CP5 does not preselect a method
+or threshold.
 
 Outputs:
 
@@ -855,8 +862,9 @@ find . -maxdepth 2
 - never use a random row split;
 - never calculate temporal features with future values;
 - fit preprocessing only on training data;
-- calibrate only on validation data;
-- select thresholds before final test evaluation;
+- fit calibrators only on the first chronological validation half;
+- select calibration methods and thresholds only on the second half;
+- keep test labels and outcomes sealed until the frozen CP8 evaluation;
 - retain complete sessions when sampling;
 - never tune on the test set;
 - never expose the target label to the LLM;
@@ -867,7 +875,8 @@ find . -maxdepth 2
 
 ## 25. Known limitations
 
-- The exact MOS threshold used for `future_poor_qoe` still needs explicit documentation.
+- The target is a one-observation-ahead state forecast, not degradation onset;
+  the elapsed interval between observations is irregular.
 - The final sample is smaller than the full long-format dataset.
 - Evaluation covers one dataset and one family of historical scenarios.
 - Random Forest feature importance is associative, not causal.

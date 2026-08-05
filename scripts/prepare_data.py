@@ -5,25 +5,21 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
-import yaml
 
+from qoe_twin.artifact_lineage import load_resolved_configuration
 from qoe_twin.data_loader import load_scenario_file
 from qoe_twin.preprocessing import convert_selected_bitrates_to_long
 from qoe_twin.target import add_future_target, add_sessions
 
-
-CONFIG_PATH = Path("configs/data.yaml")
-
-
-def load_config() -> dict:
-    """Load the project data configuration."""
-    with CONFIG_PATH.open("r", encoding="utf-8") as file:
-        return yaml.safe_load(file)
+CONFIG_DIRECTORY = Path("configs")
 
 
 def main() -> None:
     """Create and save the unified long-format dataset."""
-    config = load_config()
+    configuration = load_resolved_configuration(
+        CONFIG_DIRECTORY
+    )
+    config = configuration.values["data"]
 
     dataset_config = config["dataset"]
     selected_bitrates = config["video"][

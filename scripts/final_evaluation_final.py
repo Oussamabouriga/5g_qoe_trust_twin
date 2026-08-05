@@ -549,6 +549,7 @@ def main() -> None:
     ) = load_selected_final_calibrator(
         CONFIGURATION_PATH,
         CALIBRATED_DIRECTORY,
+        configuration=configuration,
     )
     (
         numeric_features,

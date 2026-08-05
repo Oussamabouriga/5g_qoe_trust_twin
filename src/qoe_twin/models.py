@@ -13,6 +13,8 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 def build_network_logistic_regression(
     numeric_features: list[str],
     random_seed: int = 42,
+    max_iter: int = 2_000,
+    class_weight: str = "balanced",
 ) -> Pipeline:
     """Create the required network-only Logistic Regression pipeline."""
     numeric_pipeline = Pipeline(
@@ -40,8 +42,8 @@ def build_network_logistic_regression(
     )
 
     model = LogisticRegression(
-        max_iter=2_000,
-        class_weight="balanced",
+        max_iter=max_iter,
+        class_weight=class_weight,
         solver="lbfgs",
         random_state=random_seed,
     )
@@ -63,6 +65,7 @@ def build_cross_layer_random_forest(
     min_samples_leaf: int = 5,
     n_jobs: int = 4,
     max_samples: float | None = None,
+    class_weight: str = "balanced_subsample",
 ) -> Pipeline:
     """Create the required cross-layer Random Forest pipeline."""
     numeric_pipeline = Pipeline(
@@ -110,7 +113,7 @@ def build_cross_layer_random_forest(
         n_estimators=n_estimators,
         max_depth=max_depth,
         min_samples_leaf=min_samples_leaf,
-        class_weight="balanced_subsample",
+        class_weight=class_weight,
         n_jobs=n_jobs,
         max_samples=max_samples,
         random_state=random_seed,

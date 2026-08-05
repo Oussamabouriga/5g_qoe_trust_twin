@@ -30,7 +30,7 @@ processing:
   preserve_original_files: true
 
 splitting:
-  method: "chronological_by_session"
+  method: "global_chronological"
   train_fraction: 0.60
   validation_fraction: 0.20
   test_fraction: 0.20

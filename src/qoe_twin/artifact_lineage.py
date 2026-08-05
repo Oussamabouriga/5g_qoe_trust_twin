@@ -436,6 +436,8 @@ def _reject_json_constant(value: str) -> Any:
 def load_selected_final_calibrator(
     selection_path: str | Path,
     calibrated_directory: str | Path,
+    *,
+    configuration: LoadedConfiguration,
 ) -> tuple[str, Path, dict[str, Any]]:
     """Load the recorded final RF selection and resolve its calibrator."""
     path = Path(selection_path)
@@ -465,6 +467,16 @@ def load_selected_final_calibrator(
     if type(payload) is not dict:
         raise ArtifactLineageError(
             "Selected calibration configuration must contain one object."
+        )
+    configuration_hash = resolved_configuration_sha256(configuration)
+    recorded_configuration_hash = _require_sha256(
+        payload.get("configuration_sha256"),
+        label="selected configuration_sha256",
+    )
+    if recorded_configuration_hash != configuration_hash:
+        raise ArtifactLineageError(
+            "Selected calibration configuration SHA-256 does not match "
+            "the resolved CP3 configuration."
         )
     selected = payload.get("cross_layer_random_forest")
     if type(selected) is not dict:

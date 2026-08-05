@@ -120,6 +120,74 @@ def remove_cross_boundary_targets(
     return result
 
 
+def split_validation_chronologically(
+    validation: pd.DataFrame,
+    *,
+    calibration_fraction: float,
+    target_column: str = "future_poor_qoe",
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Create isolated calibrator-fit and model-selection validation halves."""
+    if not 0.0 < calibration_fraction < 1.0:
+        raise ValueError(
+            "calibration_fraction must be strictly between 0 and 1."
+        )
+
+    required_columns = {
+        "timestamp",
+        "future_timestamp",
+        target_column,
+    }
+    missing_columns = sorted(required_columns - set(validation.columns))
+    if missing_columns:
+        raise ValueError(
+            "Validation data is missing required columns: "
+            + ", ".join(missing_columns)
+        )
+
+    timestamps = (
+        validation["timestamp"]
+        .dropna()
+        .drop_duplicates()
+        .sort_values()
+        .reset_index(drop=True)
+    )
+    split_index = int(len(timestamps) * calibration_fraction)
+    if split_index <= 0 or split_index >= len(timestamps):
+        raise ValueError(
+            "Calibration and selection periods must each contain timestamps."
+        )
+    midpoint = timestamps.iloc[split_index]
+
+    valid_target = (
+        validation[target_column].notna()
+        & validation["future_timestamp"].notna()
+    )
+    calibration = validation.loc[
+        valid_target
+        & validation["timestamp"].lt(midpoint)
+        & validation["future_timestamp"].lt(midpoint)
+    ].copy()
+    selection = validation.loc[
+        valid_target
+        & validation["timestamp"].ge(midpoint)
+    ].copy()
+
+    if calibration.empty or selection.empty:
+        raise ValueError(
+            "Calibration and selection periods must both contain observations."
+        )
+    if calibration["timestamp"].max() >= selection["timestamp"].min():
+        raise ValueError(
+            "Calibration and threshold-selection periods overlap."
+        )
+    if calibration["future_timestamp"].max() >= selection["timestamp"].min():
+        raise ValueError(
+            "Calibration labels cross into the threshold-selection period."
+        )
+
+    return calibration, selection
+
+
 def validate_split_order(
     frame: pd.DataFrame,
 ) -> None:
