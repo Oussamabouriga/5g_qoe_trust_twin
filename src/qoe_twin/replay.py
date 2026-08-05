@@ -82,30 +82,34 @@ class TraceDrivenQoETwin:
         self.model = model
         self.feature_names = feature_names or []
         self.decision_threshold = decision_threshold
+        self._history_size = history_size
 
         self.current_state: TwinState | None = None
         self.history: deque[TwinState] = deque(
             maxlen=history_size
         )
+        self._state_by_session: dict[str, TwinState] = {}
+        self._history_by_session: dict[
+            str,
+            deque[TwinState],
+        ] = {}
 
         self.predictions: list[TwinPrediction] = []
         self.current_session_id: str | None = None
 
     def reset_session(self) -> None:
-        """Clear state when a new temporal session begins."""
+        """Clear all session state and the active-session view."""
         self.current_state = None
         self.history.clear()
         self.current_session_id = None
+        for session_history in self._history_by_session.values():
+            session_history.clear()
+        self._state_by_session.clear()
+        self._history_by_session.clear()
 
     def update_state(self, row: pd.Series) -> TwinState:
         """Update the twin using the current chronological observation."""
         session_id = str(row["session_id"])
-
-        if (
-            self.current_session_id is not None
-            and session_id != self.current_session_id
-        ):
-            self.reset_session()
 
         state = TwinState(
             session_id=session_id,
@@ -126,9 +130,16 @@ class TraceDrivenQoETwin:
             ),
         )
 
+        session_history = self._history_by_session.setdefault(
+            session_id,
+            deque(maxlen=self._history_size),
+        )
+        session_history.append(state)
+
+        self._state_by_session[session_id] = state
         self.current_state = state
         self.current_session_id = session_id
-        self.history.append(state)
+        self.history = session_history
 
         return state
 
@@ -204,6 +215,9 @@ class TraceDrivenQoETwin:
         frame: pd.DataFrame,
     ) -> pd.DataFrame:
         """Replay a dataset one row at a time in chronological order."""
+        self.predictions.clear()
+        self.reset_session()
+
         required_columns = {
             "session_id",
             "user_id",
@@ -230,13 +244,11 @@ class TraceDrivenQoETwin:
 
         ordered = frame.sort_values(
             [
-                "session_id",
                 "timestamp",
-            ]
+                "session_id",
+            ],
+            kind="stable",
         ).reset_index(drop=True)
-
-        self.predictions.clear()
-        self.reset_session()
 
         previous_timestamp_by_session: dict[
             str,

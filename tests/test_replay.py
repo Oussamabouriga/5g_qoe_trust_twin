@@ -124,7 +124,7 @@ def test_update_state_isolates_history_when_session_changes() -> None:
     assert len(twin.history) == 1
 
 
-def test_replay_order_is_deterministic_and_chronological_per_session() -> None:
+def test_replay_order_is_stable_global_chronological() -> None:
     combined = pd.concat(
         [create_replay_frame(), create_second_session()],
         ignore_index=True,
@@ -148,9 +148,48 @@ def test_replay_order_is_deterministic_and_chronological_per_session() -> None:
         second_predictions,
     )
 
+    assert first_predictions["session_id"].tolist() == [
+        "s1",
+        "s2",
+        "s1",
+        "s2",
+        "s1",
+        "s2",
+    ]
+    assert first_predictions[
+        "timestamp"
+    ].is_monotonic_increasing
+
     for _, session_predictions in first_predictions.groupby(
         "session_id"
     ):
         assert session_predictions[
             "timestamp"
         ].is_monotonic_increasing
+
+
+def test_interleaved_replay_restores_each_session_history() -> None:
+    combined = pd.concat(
+        [create_replay_frame(), create_second_session()],
+        ignore_index=True,
+    )
+    twin = HistoryRecordingTwin()
+
+    twin.replay(combined)
+
+    assert twin.history_snapshots == [
+        ("s1",),
+        ("s2",),
+        ("s1", "s1"),
+        ("s2", "s2"),
+        ("s1", "s1", "s1"),
+        ("s2", "s2", "s2"),
+    ]
+    assert twin.current_session_id == "s2"
+    assert twin.current_state is not None
+    assert twin.current_state.session_id == "s2"
+    assert tuple(state.session_id for state in twin.history) == (
+        "s2",
+        "s2",
+        "s2",
+    )

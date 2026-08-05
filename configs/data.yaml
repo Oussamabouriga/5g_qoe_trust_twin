@@ -29,6 +29,14 @@ processing:
   sort_chronologically: true
   preserve_original_files: true
 
+sample:
+  input_file: "data/processed/friend_snapshot_quarantine/qoe_modeling_final_sample.parquet"
+  input_sha256: "68ee536b88d294b9faa97b5e2c7d3eec4c46c07dc756d163b95ce32fa1d09100"
+  provenance_manifest: "provenance/friend_snapshot_manifest.json"
+  provenance_manifest_sha256: "d7bab12de9b512f99e174dd1b52bf48bfd646023f1d89dfc3c3359ef48b9001b"
+  corrected_feature_file: "data/processed/qoe_features_final.parquet"
+  split_manifest_file: "manifests/cp6_sample_split_manifest.json"
+
 splitting:
   method: "global_chronological"
   train_fraction: 0.60

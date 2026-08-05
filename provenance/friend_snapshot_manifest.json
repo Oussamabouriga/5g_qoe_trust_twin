@@ -1,0 +1,1162 @@
+{
+  "artifacts": [
+    {
+      "byte_size": 22223555,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_1_Driver_PRB_10.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "9be75b56171086b4bd0efc00c222dab5c46f94ff6882e649202dfc08d17587c0",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 22140331,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_1_Driver_PRB_15.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "21969647d260e9998d14229b06fdadeca8c997cb21a2cfc80ee121706915dba9",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 22141437,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_1_Driver_PRB_20.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "e5ec2a5c94a8bb7fe47e99ba602aef207384718e9bada90f63512e104230ee3f",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 22176727,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_1_Driver_PRB_25.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "9a94daf34f349d90c3ad01fddb273e60cd652ac066818bbd4fd7f818d30552ac",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 22138823,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_1_Driver_PRB_30.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "186f10a3a9cd112a43bf8815a1535e3b80ffdbd2a39b905c87a387b6dd07bbd0",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 22169257,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_1_Driver_PRB_35.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "d37c865d2e3c2ed2a3d473d156cbcbe47e84519485bf3e8994d217c67f22a6e5",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 22122081,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_1_Driver_PRB_40.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "b0ab7893e5b4c5dd8e15dc2a73915bfab2fe83c49f14f1cc0be5ca0f70575ed2",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 22105421,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_1_Driver_PRB_5.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "f524d72a00a8233d2f7d116b3bddfde3f424d3df6b55c3f9991bcc2358ad263d",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 13069101,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_2_Driver_PRB_10.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "edf0fba8fb6542555918522f476836db6ae09c4762bb2aadc2e4c23bace6d5c5",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 13028872,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_2_Driver_PRB_15.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "98c57e1f622e7e4bf1bc35ed1710f51bd5cc4a51d02f4f01d7e2e90590fab5b0",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 13030519,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_2_Driver_PRB_20.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "c9cb3ed7880fa6f945cf103cbfa85bcb728129edc5b8c4a4f69259ebf8ee8d5c",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 13065074,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_2_Driver_PRB_25.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "6f9deb8b931e35eae9e111b0e8e33c8bdadec84f68670ac7a7770c0735bbc745",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 13024172,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_2_Driver_PRB_30.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "8d3aab30510f5beb1d421ce8d44d90f6aff1c8578d5eb339cea4cedaa3f36010",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 13049684,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_2_Driver_PRB_35.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "ac4a1278870e2bbbfc26e8f6f16fd3f3f1535f043fdf3aad236f1aae5f664baf",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 13025125,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_2_Driver_PRB_40.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "8ab66c40a0af8d449d837d78544e46a9992f55f8c9626a867920da344bc58843",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 13037665,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_2_Driver_PRB_5.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "2dd804f5df23d564abf515f59e94d78fae693a12f824715f8287536ed812f750",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 98522541,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_3_Driver_PRB_10.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "59620a2598281849b99a618aa4e44b963f4c8a67b1d976dcde820627b3aa6339",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 98522923,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_3_Driver_PRB_15.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "d5b3f1d9eee78c6307c4d07cd02d82e4b74d982bb80c861d1fcfbe5596879a9f",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 98341906,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_3_Driver_PRB_20.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "b7f5ab817fb57f55d79bae507023edc82a9c8f77a1cb0f97e310e80c46dfb16f",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 98734343,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_3_Driver_PRB_25.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "aad42f034bc361ed7a1b26301e39b52ab09b03a126198c168a57592560cc9687",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 98661459,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_3_Driver_PRB_30.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "389a0d302883edc689dd050a25fde2b25380085f1b704be23b9ca5c00bc3ac0d",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 98726682,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_3_Driver_PRB_35.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "10ba105433de5c64360429deabbf271cf42b60bbc876db7c3d11b8010db8693a",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 98505165,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_3_Driver_PRB_40.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "4433e2def09f085c3ba7c5d1caa98fdd3fb480f7cf9738c78578a43c7aa373af",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 98606703,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_3_Driver_PRB_5.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "5a5fee48571469155390dd8854622f8c16aadfd10f2bb5455f7ed9e10ce5ea47",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 7912939,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_4_Driver_PRB_10.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "e2409a2038cee8859d54128c0ae77579f87a63b934bf99939b622fe47f167ebe",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 7869346,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_4_Driver_PRB_15.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "1fae4459cf02c949019ef4b1c06ced2c5f2b703a6f6458a3dd04c9aa62f2359f",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 7881372,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_4_Driver_PRB_20.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "45141549d6102db7b5100cdb1b460dc8dfb99503f35f7e41dc0134cb3edacf4a",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 7902914,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_4_Driver_PRB_25.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "cd997a46692a2da26c9e0ac8b3dfbbc24f96a624412fae48f1eae800b00c872d",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 7865494,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_4_Driver_PRB_30.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "ce4ea92fefbb92cc81fde62cf3b512160ec58722d4ae6b52141724f28948d7ec",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 7895629,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_4_Driver_PRB_35.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "21d93fb7ba191c928dcb436a3dd57b13a628dd556830a6089a61ee0f7bd1e050",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 7870120,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_4_Driver_PRB_40.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "4d0a122aa12b1c30875fd57038afd614c49eee554b35f27f635893488175263f",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 7860013,
+      "destination_path": "data/external/5G-QoERA/5G-QoERA/MOS_BS_4_Driver_PRB_5.tsv",
+      "role": "upstream_raw_tsv",
+      "sha256": "9ffe0555a38f7a73c2a042d8597f6626a3ba8862d7b4f4312ac203dbc6798369",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 35149,
+      "destination_path": "data/external/5G-QoERA/LICENSE",
+      "role": "upstream_license",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 2378,
+      "destination_path": "data/external/5G-QoERA/README.md",
+      "role": "upstream_readme",
+      "sha256": "f301a313a4f381dd4813146e0174bc707d3fcd9a33079ef54fdb7940fa6501df",
+      "status": "trusted_raw_input"
+    },
+    {
+      "byte_size": 22023030,
+      "destination_path": "data/processed/friend_snapshot_quarantine/qoe_features_final.parquet",
+      "parquet_metadata": {
+        "columns": 46,
+        "compression": [
+          "SNAPPY"
+        ],
+        "row_groups": 1,
+        "rows": 897056,
+        "schema": [
+          {
+            "name": "user_id",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "timestamp",
+            "nullable": true,
+            "type": "timestamp[ns, tz=UTC]"
+          },
+          {
+            "name": "throughput_mbps",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "latitude",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "longitude",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "base_station",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "mobility",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "prb",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "bitrate_kbps",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "resolution",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "plr_percent",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "current_mos",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "gap_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "is_session_start",
+            "nullable": true,
+            "type": "bool"
+          },
+          {
+            "name": "session_number",
+            "nullable": true,
+            "type": "int32"
+          },
+          {
+            "name": "session_id",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "future_mos",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "future_timestamp",
+            "nullable": true,
+            "type": "timestamp[ns, tz=UTC]"
+          },
+          {
+            "name": "prediction_lead_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "future_poor_qoe",
+            "nullable": true,
+            "type": "int8"
+          },
+          {
+            "name": "throughput_lag1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_lag2",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "mos_lag1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "plr_lag1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "latitude_lag1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "longitude_lag1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_change_1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "mos_change_1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "plr_change_1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_past_mean_3",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "mos_past_mean_3",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "plr_past_mean_3",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_past_mean_5",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "mos_past_mean_5",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "plr_past_mean_5",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_past_std_5",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "mos_past_std_5",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "bitrate_mbps",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_to_bitrate_ratio",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "capacity_margin_mbps",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "capacity_insufficient",
+            "nullable": true,
+            "type": "int8"
+          },
+          {
+            "name": "movement_distance_km",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "movement_speed_kmh",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "session_step",
+            "nullable": true,
+            "type": "int32"
+          },
+          {
+            "name": "elapsed_session_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "split",
+            "nullable": true,
+            "type": "string"
+          }
+        ]
+      },
+      "role": "friend_processed_snapshot",
+      "sha256": "5971cef9e0ac6b1e456ebecf61696383a9738665ac1748f67f1695b1f9ef0087",
+      "status": "quarantine"
+    },
+    {
+      "byte_size": 5823007,
+      "destination_path": "data/processed/friend_snapshot_quarantine/qoe_features_prototype.parquet",
+      "parquet_metadata": {
+        "columns": 46,
+        "compression": [
+          "SNAPPY"
+        ],
+        "row_groups": 1,
+        "rows": 297248,
+        "schema": [
+          {
+            "name": "user_id",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "timestamp",
+            "nullable": true,
+            "type": "timestamp[ns, tz=UTC]"
+          },
+          {
+            "name": "throughput_mbps",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "latitude",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "longitude",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "base_station",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "mobility",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "prb",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "bitrate_kbps",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "resolution",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "plr_percent",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "current_mos",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "gap_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "is_session_start",
+            "nullable": true,
+            "type": "bool"
+          },
+          {
+            "name": "session_number",
+            "nullable": true,
+            "type": "int32"
+          },
+          {
+            "name": "session_id",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "future_mos",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "future_timestamp",
+            "nullable": true,
+            "type": "timestamp[ns, tz=UTC]"
+          },
+          {
+            "name": "prediction_lead_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "future_poor_qoe",
+            "nullable": true,
+            "type": "int8"
+          },
+          {
+            "name": "throughput_lag1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_lag2",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "mos_lag1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "plr_lag1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "latitude_lag1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "longitude_lag1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_change_1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "mos_change_1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "plr_change_1",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_past_mean_3",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "mos_past_mean_3",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "plr_past_mean_3",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_past_mean_5",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "mos_past_mean_5",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "plr_past_mean_5",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_past_std_5",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "mos_past_std_5",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "bitrate_mbps",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "throughput_to_bitrate_ratio",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "capacity_margin_mbps",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "capacity_insufficient",
+            "nullable": true,
+            "type": "int8"
+          },
+          {
+            "name": "movement_distance_km",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "movement_speed_kmh",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "session_step",
+            "nullable": true,
+            "type": "int32"
+          },
+          {
+            "name": "elapsed_session_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "split",
+            "nullable": true,
+            "type": "string"
+          }
+        ]
+      },
+      "role": "friend_processed_snapshot",
+      "sha256": "5a7dda9634e09bec6db8e46842ab02e84043959e94a0d3cdebc88b7d34dfa325",
+      "status": "quarantine"
+    },
+    {
+      "byte_size": 576403121,
+      "destination_path": "data/processed/friend_snapshot_quarantine/qoe_modeling_dataset.parquet",
+      "parquet_metadata": {
+        "columns": 20,
+        "compression": [
+          "SNAPPY"
+        ],
+        "row_groups": 16,
+        "rows": 16590144,
+        "schema": [
+          {
+            "name": "user_id",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "timestamp",
+            "nullable": true,
+            "type": "timestamp[ns, tz=UTC]"
+          },
+          {
+            "name": "throughput_mbps",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "latitude",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "longitude",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "base_station",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "mobility",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "prb",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "bitrate_kbps",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "resolution",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "plr_percent",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "current_mos",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "gap_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "is_session_start",
+            "nullable": true,
+            "type": "bool"
+          },
+          {
+            "name": "session_number",
+            "nullable": true,
+            "type": "int32"
+          },
+          {
+            "name": "session_id",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "future_mos",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "future_timestamp",
+            "nullable": true,
+            "type": "timestamp[ns, tz=UTC]"
+          },
+          {
+            "name": "prediction_lead_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "future_poor_qoe",
+            "nullable": true,
+            "type": "int8"
+          }
+        ]
+      },
+      "role": "friend_processed_snapshot",
+      "sha256": "3bbdd1bb3ca925c73b13c4bcfdf3882e23a181b267d98d9fb7804bbdddf41296",
+      "status": "quarantine"
+    },
+    {
+      "byte_size": 11842202,
+      "destination_path": "data/processed/friend_snapshot_quarantine/qoe_modeling_final_sample.parquet",
+      "parquet_metadata": {
+        "columns": 20,
+        "compression": [
+          "SNAPPY"
+        ],
+        "row_groups": 1,
+        "rows": 994496,
+        "schema": [
+          {
+            "name": "user_id",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "timestamp",
+            "nullable": true,
+            "type": "timestamp[ns, tz=UTC]"
+          },
+          {
+            "name": "throughput_mbps",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "latitude",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "longitude",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "base_station",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "mobility",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "prb",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "bitrate_kbps",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "resolution",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "plr_percent",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "current_mos",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "gap_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "is_session_start",
+            "nullable": true,
+            "type": "bool"
+          },
+          {
+            "name": "session_number",
+            "nullable": true,
+            "type": "int32"
+          },
+          {
+            "name": "session_id",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "future_mos",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "future_timestamp",
+            "nullable": true,
+            "type": "timestamp[ns, tz=UTC]"
+          },
+          {
+            "name": "prediction_lead_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "future_poor_qoe",
+            "nullable": true,
+            "type": "int8"
+          }
+        ]
+      },
+      "role": "friend_processed_snapshot",
+      "sha256": "68ee536b88d294b9faa97b5e2c7d3eec4c46c07dc756d163b95ce32fa1d09100",
+      "status": "quarantine"
+    },
+    {
+      "byte_size": 3175179,
+      "destination_path": "data/processed/friend_snapshot_quarantine/qoe_modeling_prototype.parquet",
+      "parquet_metadata": {
+        "columns": 20,
+        "compression": [
+          "SNAPPY"
+        ],
+        "row_groups": 1,
+        "rows": 329376,
+        "schema": [
+          {
+            "name": "user_id",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "timestamp",
+            "nullable": true,
+            "type": "timestamp[ns, tz=UTC]"
+          },
+          {
+            "name": "throughput_mbps",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "latitude",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "longitude",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "base_station",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "mobility",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "prb",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "bitrate_kbps",
+            "nullable": true,
+            "type": "int64"
+          },
+          {
+            "name": "resolution",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "plr_percent",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "current_mos",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "gap_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "is_session_start",
+            "nullable": true,
+            "type": "bool"
+          },
+          {
+            "name": "session_number",
+            "nullable": true,
+            "type": "int32"
+          },
+          {
+            "name": "session_id",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "name": "future_mos",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "future_timestamp",
+            "nullable": true,
+            "type": "timestamp[ns, tz=UTC]"
+          },
+          {
+            "name": "prediction_lead_seconds",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "name": "future_poor_qoe",
+            "nullable": true,
+            "type": "int8"
+          }
+        ]
+      },
+      "role": "friend_processed_snapshot",
+      "sha256": "d1b6f64bc78d1e90e2281503c4f18e6e97583cd90643510ae649e7ae61c13ded",
+      "status": "quarantine"
+    }
+  ],
+  "dataset_name": "5G-QoERA",
+  "explicit_exclusions": [
+    "credential-bearing files, secret values, and remote URLs containing credentials",
+    "both source Git metadata trees, .gitmodules, and remote configuration",
+    "friend caches other than the five named processed Parquet quarantine records, environments, and operating-system metadata",
+    "friend configuration, dependency files, notebooks, and documentation",
+    "friend models, calibrators, results, predictions, metrics, figures, and explanations",
+    "friend source code, scripts, and tests",
+    "processed artifacts other than the five named quarantine records"
+  ],
+  "friend_root_commit": "d62f7eabd0117a20591a2111eabbdfdef25f8642",
+  "intake_code_commit": "1cb921fd4b6e8c616f47a094c48e3472299de6e6",
+  "license_identifier": "GPL-3.0",
+  "models_or_results_imported": false,
+  "processed_artifacts_have_producing_git_or_configuration_hash": false,
+  "provenance_limitations": [
+    "Quarantine records preserve evidence only and are not approved inputs or canonical results.",
+    "Raw trust covers repository provenance and byte identity, not scientific correctness or fitness for use.",
+    "The five processed artifacts have no embedded producing Git commit, resolved configuration hash, or complete run log.",
+    "The friend root commit does not establish which code revision produced the processed artifacts."
+  ],
+  "raw_tsv_contract": {
+    "file_count": 32,
+    "filename_pattern": "^MOS_BS_[1-4]_Driver_PRB_(5|10|15|20|25|30|35|40)\\.tsv$",
+    "header": [
+      "User_ID",
+      "Timestamp",
+      "Tput",
+      "Latitude",
+      "Longitude",
+      "240p_50kbps",
+      "240p_100kbps",
+      "240p_150kbps",
+      "360p_200kbps",
+      "360p_250kbps",
+      "360p_300kbps",
+      "360p_400kbps",
+      "360p_500kbps",
+      "360p_600kbps",
+      "360p_700kbps",
+      "720p_900kbps",
+      "720p_1200kbps",
+      "720p_1500kbps",
+      "720p_2000kbps",
+      "1080p_2500kbps",
+      "1080p_3000kbps",
+      "1080p_4000kbps",
+      "1080p_5000kbps",
+      "1080p_6000kbps",
+      "1080p_8000kbps",
+      "MOS_50kbps",
+      "MOS_100kbps",
+      "MOS_150kbps",
+      "MOS_200kbps",
+      "MOS_250kbps",
+      "MOS_300kbps",
+      "MOS_400kbps",
+      "MOS_500kbps",
+      "MOS_600kbps",
+      "MOS_700kbps",
+      "MOS_900kbps",
+      "MOS_1200kbps",
+      "MOS_1500kbps",
+      "MOS_2000kbps",
+      "MOS_2500kbps",
+      "MOS_3000kbps",
+      "MOS_4000kbps",
+      "MOS_5000kbps",
+      "MOS_6000kbps",
+      "MOS_8000kbps"
+    ]
+  },
+  "schema_version": "1.0.0",
+  "source_classification": "clean_upstream_git_export_with_quarantined_processed_snapshot",
+  "upstream_repository_commit": "3add3121ded7a31f1434e863073917772993b74b"
+}

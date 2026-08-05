@@ -31,6 +31,7 @@ CONFIG_FILENAMES = (
 )
 
 _ENVIRONMENT_VARIABLE_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _UINT32_MAX = 2**32 - 1
 _SUM_TOLERANCE = 1e-9
 
@@ -238,6 +239,15 @@ def _relative_path(value: Any, path: str, unresolved: list[str]) -> str:
     return value
 
 
+def _sha256(value: Any, path: str, unresolved: list[str]) -> str:
+    value = _nonempty_string(value, path, unresolved)
+    if _SHA256_RE.fullmatch(value) is None:
+        raise ConfigurationError(
+            f"{path} must be a lowercase 64-digit SHA-256 digest."
+        )
+    return value
+
+
 def _separator(value: Any, path: str, unresolved: list[str]) -> str:
     del unresolved
     if type(value) is not str or len(value) != 1:
@@ -393,6 +403,16 @@ _DATA_SCHEMA = _mapping(
                 "output_file": _relative_path,
                 "preserve_original_files": _boolean,
                 "sort_chronologically": _boolean,
+            }
+        ),
+        "sample": _mapping(
+            {
+                "corrected_feature_file": _relative_path,
+                "input_file": _relative_path,
+                "input_sha256": _sha256,
+                "provenance_manifest": _relative_path,
+                "provenance_manifest_sha256": _sha256,
+                "split_manifest_file": _relative_path,
             }
         ),
         "sessions": _mapping({"gap_threshold_seconds": _POSITIVE_NUMBER}),

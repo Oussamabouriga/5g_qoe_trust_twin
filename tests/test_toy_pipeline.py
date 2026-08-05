@@ -1,9 +1,8 @@
 """Artifact-independent smoke test for the replay-to-evaluation pipeline.
 
-Later phases intentionally own the following extensions:
-- threshold-aware confidence around the learned decision threshold: CP3;
-- semantic LLM field, unit, and contradiction validation: CP6;
-- global interleaved-session replay and batch/replay parity: CP9.
+The replacement roadmap assigns threshold-aware trust and semantic LLM
+validation to CP7. CP6 replay parity is covered separately in
+``test_replay_parity.py``.
 """
 
 import numpy as np

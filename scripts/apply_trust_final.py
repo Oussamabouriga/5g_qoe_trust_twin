@@ -136,7 +136,8 @@ def main() -> None:
     calibrator = joblib.load(calibrator_path)
 
     test = test.sort_values(
-        ["session_id", "timestamp"]
+        ["timestamp", "session_id"],
+        kind="stable",
     ).reset_index(drop=True)
 
     raw_probability = model.predict_proba(

@@ -1,0 +1,206 @@
+{
+  "artifact_kind": "corrected_causal_feature_dataset",
+  "configuration_sha256": "2f42ff61bb5cf30b0289365dc4bca589533c74e72b3b20da822cce4fcfab152c",
+  "input": {
+    "byte_size": 11842202,
+    "columns": 20,
+    "friend_root_commit": "d62f7eabd0117a20591a2111eabbdfdef25f8642",
+    "path": "data/processed/friend_snapshot_quarantine/qoe_modeling_final_sample.parquet",
+    "provenance_manifest_path": "provenance/friend_snapshot_manifest.json",
+    "provenance_manifest_sha256": "d7bab12de9b512f99e174dd1b52bf48bfd646023f1d89dfc3c3359ef48b9001b",
+    "provenance_status": "quarantine",
+    "rows": 994496,
+    "schema_sha256": "d4376d7f31aef51d1e5ab3c768891223b82e09b174c51b702c21c558558df608",
+    "sha256": "68ee536b88d294b9faa97b5e2c7d3eec4c46c07dc756d163b95ce32fa1d09100",
+    "upstream_repository_commit": "3add3121ded7a31f1434e863073917772993b74b"
+  },
+  "limitations": [
+    "The historical sampling command and producing configuration are unavailable.",
+    "The group-balanced sample is an earliest-time prefix, not a random or full-dataset sample.",
+    "Four bitrate rows share each physical radio observation and are not independent."
+  ],
+  "output": {
+    "byte_size": 9349609,
+    "columns": 46,
+    "path": "data/processed/qoe_features_final.parquet",
+    "rows": 897056,
+    "schema_sha256": "102a0ecd13e279f33023c3f344cb7268bd036cd31b108cb0fd21a2ff6c5b8cb5",
+    "sha256": "7a4bf7ebe0cb2e94701638880b7aa06942d7ccf7cfd0d5241a20a187a37a0e76"
+  },
+  "policies": {
+    "bitrate_to_resolution": {
+      "2000": "720p",
+      "4000": "1080p",
+      "6000": "1080p",
+      "8000": "1080p"
+    },
+    "discarded_inherited_session_columns": [
+      "gap_seconds",
+      "is_session_start",
+      "session_number",
+      "session_id"
+    ],
+    "discarded_inherited_target_columns": [
+      "future_mos",
+      "future_timestamp",
+      "prediction_lead_seconds",
+      "future_poor_qoe"
+    ],
+    "global_split_fractions": {
+      "test": 0.2,
+      "train": 0.6,
+      "validation": 0.2
+    },
+    "horizon_steps": 1,
+    "ordered_cross_layer_features": [
+      "throughput_mbps",
+      "prb",
+      "base_station",
+      "latitude",
+      "longitude",
+      "gap_seconds",
+      "throughput_lag1",
+      "throughput_lag2",
+      "throughput_change_1",
+      "throughput_past_mean_3",
+      "throughput_past_mean_5",
+      "throughput_past_std_5",
+      "movement_distance_km",
+      "movement_speed_kmh",
+      "session_step",
+      "elapsed_session_seconds",
+      "bitrate_kbps",
+      "resolution",
+      "plr_percent",
+      "current_mos",
+      "mos_lag1",
+      "plr_lag1",
+      "mos_change_1",
+      "plr_change_1",
+      "mos_past_mean_3",
+      "mos_past_mean_5",
+      "mos_past_std_5",
+      "plr_past_mean_3",
+      "plr_past_mean_5",
+      "bitrate_mbps",
+      "throughput_to_bitrate_ratio",
+      "capacity_margin_mbps",
+      "capacity_insufficient"
+    ],
+    "ordered_network_features": [
+      "throughput_mbps",
+      "prb",
+      "base_station",
+      "latitude",
+      "longitude",
+      "gap_seconds",
+      "throughput_lag1",
+      "throughput_lag2",
+      "throughput_change_1",
+      "throughput_past_mean_3",
+      "throughput_past_mean_5",
+      "throughput_past_std_5",
+      "movement_distance_km",
+      "movement_speed_kmh",
+      "session_step",
+      "elapsed_session_seconds"
+    ],
+    "poor_qoe_rule": "future_mos < 3.0",
+    "row_identity_columns": [
+      "base_station",
+      "mobility",
+      "prb",
+      "user_id",
+      "timestamp",
+      "bitrate_kbps"
+    ],
+    "selected_bitrates_kbps": [
+      2000,
+      4000,
+      6000,
+      8000
+    ],
+    "session_gap_seconds": 30,
+    "split_method": "global_chronological",
+    "stored_row_order": [
+      "timestamp",
+      "session_id"
+    ]
+  },
+  "raw_compatibility": {
+    "checked_rows": 994496,
+    "missing_source_rows": 0,
+    "raw_artifact_hashes_verified": 32,
+    "raw_duplicate_key_rows": 0,
+    "scenario_files_checked": 32,
+    "value_mismatches": {
+      "current_mos": 0,
+      "latitude": 0,
+      "longitude": 0,
+      "plr_percent": 0,
+      "throughput_mbps": 0
+    }
+  },
+  "sample_validation": {
+    "boundary_value_counts": {
+      "2.999": 0,
+      "3.000": 0,
+      "3.001": 3499
+    },
+    "duplicate_row_identities": 0,
+    "duplicate_session_timestamps": 0,
+    "input_globally_timestamp_sorted": false,
+    "physical_observations": 248624,
+    "physical_observations_with_missing_bitrates": 0,
+    "rows": 994496,
+    "session_field_mismatches": {
+      "gap_seconds": 0,
+      "is_session_start": 0,
+      "session_id": 0,
+      "session_number": 0
+    },
+    "sessions": 97248,
+    "target_field_mismatches": {
+      "future_mos": 0,
+      "future_poor_qoe": 0,
+      "future_timestamp": 0,
+      "prediction_lead_seconds": 0
+    },
+    "terminal_target_rows": 97248,
+    "valid_target_rows": 897248
+  },
+  "schema_version": "1.0.0",
+  "split": {
+    "records": [
+      {
+        "end_timestamp": "2014-02-04T19:31:26.386914+00:00",
+        "rows": 537504,
+        "sessions": 51232,
+        "split": "train",
+        "start_timestamp": "2014-01-31T23:00:10.168741+00:00"
+      },
+      {
+        "end_timestamp": "2014-02-06T07:33:43.930583+00:00",
+        "rows": 180224,
+        "sessions": 17152,
+        "split": "validation",
+        "start_timestamp": "2014-02-04T19:31:46.106027+00:00"
+      },
+      {
+        "end_timestamp": "2014-02-11T08:56:52.356925+00:00",
+        "rows": 179328,
+        "sessions": 18144,
+        "split": "test",
+        "start_timestamp": "2014-02-06T07:34:00.683214+00:00"
+      }
+    ],
+    "rows_before_filtering": 994496,
+    "rows_removed": {
+      "session_terminal_target_na": 97248,
+      "train_to_validation_crossing": 64,
+      "validation_to_test_crossing": 128
+    },
+    "train_end_exclusive": "2014-02-04T19:31:46.106027+00:00",
+    "validation_end_exclusive": "2014-02-06T07:33:55.102071+00:00"
+  }
+}

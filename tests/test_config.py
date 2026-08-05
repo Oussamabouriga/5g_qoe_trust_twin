@@ -45,6 +45,14 @@ def _synthetic_documents(*, resolved_model_target: bool = False) -> dict[str, An
                 "sort_chronologically": True,
                 "preserve_original_files": False,
             },
+            "sample": {
+                "input_file": "fixtures/quarantine/sample.parquet",
+                "input_sha256": "a" * 64,
+                "provenance_manifest": "fixtures/provenance/manifest.json",
+                "provenance_manifest_sha256": "b" * 64,
+                "corrected_feature_file": "fixtures/processed/features.parquet",
+                "split_manifest_file": "fixtures/manifests/split.json",
+            },
             "splitting": {
                 "method": "global_chronological",
                 "train_fraction": 0.6,
@@ -267,6 +275,7 @@ abstention:
         ("model.yaml", ("models", "random_forest", "n_estimators"), 4.5),
         ("model.yaml", ("models", "random_forest", "min_samples_leaf"), 1.5),
         ("model.yaml", ("models", "random_forest", "max_samples"), True),
+        ("data.yaml", ("sample", "input_sha256"), 42),
     ],
 )
 def test_rejects_values_with_the_wrong_strict_type(
@@ -339,6 +348,8 @@ def test_rejects_cross_field_inconsistencies(tmp_path: Path, case: str) -> None:
         ("data.yaml", ("dataset", "file_pattern"), "../outside/*.tsv"),
         ("data.yaml", ("dataset", "file_pattern"), "C:\\outside\\*.tsv"),
         ("data.yaml", ("processing", "output_file"), "/absolute/output.parquet"),
+        ("data.yaml", ("sample", "input_sha256"), "A" * 64),
+        ("data.yaml", ("sample", "provenance_manifest_sha256"), "too-short"),
         ("llm.yaml", ("openai", "model_environment_variable"), "bad-name"),
     ],
 )
@@ -575,6 +586,23 @@ def test_repository_configuration_freezes_cp5_experiment() -> None:
         "test_fraction": 0.2,
         "train_fraction": 0.6,
         "validation_fraction": 0.2,
+    }
+    assert loaded.values["data"]["sample"] == {
+        "corrected_feature_file": "data/processed/qoe_features_final.parquet",
+        "input_file": (
+            "data/processed/friend_snapshot_quarantine/"
+            "qoe_modeling_final_sample.parquet"
+        ),
+        "input_sha256": (
+            "68ee536b88d294b9faa97b5e2c7d3eec"
+            "4c46c07dc756d163b95ce32fa1d09100"
+        ),
+        "provenance_manifest": "provenance/friend_snapshot_manifest.json",
+        "provenance_manifest_sha256": (
+            "d7bab12de9b512f99e174dd1b52bf48b"
+            "fd646023f1d89dfc3c3359ef48b9001b"
+        ),
+        "split_manifest_file": "manifests/cp6_sample_split_manifest.json",
     }
     assert loaded.values["model"]["experiment"]["random_seed"] == 42
     assert loaded.values["model"]["models"]["random_forest"] == {

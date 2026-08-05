@@ -404,19 +404,22 @@ already-poor to poor transitions remain positive examples.
 
 ---
 
-## 11. Create the resource-safe final sample
+## 11. Validate the resource-safe final sample
 
-```bash
-python scripts/create_final_sample.py --target-rows 1000000
-```
-
-Output:
+CP6 does not rebuild the 16.6-million-row intermediate on a 16 GB machine.
+It requires the locally audited, immutable input:
 
 ```text
-data/processed/qoe_modeling_final_sample.parquet
+data/processed/friend_snapshot_quarantine/qoe_modeling_final_sample.parquet
+SHA-256: 68ee536b88d294b9faa97b5e2c7d3eec4c46c07dc756d163b95ce32fa1d09100
 ```
 
-Validated sample:
+The source remains labelled `quarantine` because its historical sampling
+command is unavailable. Before using it, the CP6 build verifies its exact
+bytes and schema, checks every row against the trusted raw TSV content, and
+discards all inherited session and future-target calculations.
+
+Validated input:
 
 - 994,496 rows;
 - 97,248 complete sessions;
@@ -425,11 +428,8 @@ Validated sample:
 - PRB values from 5 to 40;
 - bitrates 2,000, 4,000, 6,000, and 8,000 kbps.
 
-Use a smaller sample on lower-resource hardware:
-
-```bash
-python scripts/create_final_sample.py --target-rows 500000
-```
+This is an earliest-time, group-balanced sample rather than a representative
+random sample. Four bitrate rows also share each physical radio observation.
 
 ---
 
@@ -441,18 +441,19 @@ python scripts/build_features_final.py
 
 This stage:
 
-- replays observations chronologically;
+- validates the pinned sample and its trusted-raw compatibility;
+- rebuilds sessions and next-observation targets from base measurements;
 - computes lag and past-only rolling features;
 - derives mobility, capacity, packet-loss, and MOS features;
 - performs a global timestamp-based 60/20/20 train/validation/test split;
-- removes targets crossing split boundaries.
+- removes targets crossing split boundaries;
+- stores rows in stable global timestamp order.
 
 Outputs:
 
 ```text
 data/processed/qoe_features_final.parquet
-results/tables/split_summary_final.csv
-results/metrics/feature_metadata_final.json
+manifests/cp6_sample_split_manifest.json
 ```
 
 Future MOS values are never used as prediction inputs.
@@ -661,8 +662,6 @@ source .venv/bin/activate
 
 python -m pytest -v
 
-python scripts/prepare_data.py
-python scripts/create_final_sample.py --target-rows 1000000
 python scripts/build_features_final.py
 python scripts/train_models_final.py
 python scripts/calibrate_models_final.py
@@ -712,8 +711,9 @@ python -m pytest -v
 | Artifact | Path |
 |---|---|
 | Complete processed dataset | `data/processed/qoe_modeling_dataset.parquet` |
-| Final complete-session sample | `data/processed/qoe_modeling_final_sample.parquet` |
+| Audited manageable input | `data/processed/friend_snapshot_quarantine/qoe_modeling_final_sample.parquet` |
 | Final feature dataset | `data/processed/qoe_features_final.parquet` |
+| CP6 sample/split manifest | `manifests/cp6_sample_split_manifest.json` |
 | Uncalibrated models | `models/uncalibrated/` |
 | Calibrated models | `models/calibrated/` |
 | Final trusted predictions | `results/predictions/final_trusted_predictions.parquet` |
@@ -840,11 +840,9 @@ results/explanations/final_explanations.json
 
 ### Memory pressure
 
-```bash
-python scripts/create_final_sample.py --target-rows 500000
-```
-
-Keep Random Forest resource limits enabled.
+Run `scripts/build_features_final.py` by itself with other memory-intensive
+applications closed. Do not construct the full 16.6-million-row intermediate
+on a 16 GB machine. Keep Random Forest resource limits enabled for CP8.
 
 ### Homebrew warnings
 
@@ -941,11 +939,9 @@ python scripts/final_evaluation_final.py
 python scripts/generate_batch_explanations.py --cases 3
 ```
 
-Complete rebuild:
+Corrected experiment from the audited manageable sample:
 
 ```bash
-python scripts/prepare_data.py
-python scripts/create_final_sample.py --target-rows 1000000
 python scripts/build_features_final.py
 python scripts/train_models_final.py
 python scripts/calibrate_models_final.py
