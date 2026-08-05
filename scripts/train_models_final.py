@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from pathlib import Path
 
 import joblib
@@ -11,10 +12,11 @@ import pandas as pd
 from qoe_twin.artifact_lineage import (
     load_resolved_configuration,
     require_feature_columns,
+    sha256_file,
     write_model_lineage,
 )
 from qoe_twin.baselines import CurrentQoEPersistenceBaseline
-from qoe_twin.config import LoadedConfiguration
+from qoe_twin.config import LoadedConfiguration, canonical_sha256
 from qoe_twin.features import (
     get_cross_layer_feature_names,
     get_network_feature_names,
@@ -23,6 +25,7 @@ from qoe_twin.models import (
     build_cross_layer_random_forest,
     build_network_logistic_regression,
 )
+from qoe_twin.sample_validation import parquet_metadata
 
 DATA_PATH = Path(
     "data/processed/qoe_features_final.parquet"
@@ -31,6 +34,110 @@ DATA_PATH = Path(
 MODEL_DIRECTORY = Path("models/uncalibrated")
 RESULT_DIRECTORY = Path("results/metrics")
 CONFIG_DIRECTORY = Path("configs")
+
+
+class TrainingDatasetManifestError(ValueError):
+    """Raised when the corrected training dataset cannot be authenticated."""
+
+
+def _repository_path(repository_root: Path, path: str | Path) -> Path:
+    candidate = Path(path)
+    if candidate.is_absolute():
+        return candidate.resolve()
+    return (repository_root / candidate).resolve()
+
+
+def validate_training_dataset_manifest(
+    configuration: LoadedConfiguration,
+    *,
+    data_path: Path = DATA_PATH,
+    repository_root: Path = Path("."),
+) -> dict[str, str | int]:
+    """Authenticate the configured CP6 dataset without loading its rows."""
+    sample_configuration = configuration.values["data"]["sample"]
+    configured_data_path = str(sample_configuration["corrected_feature_file"])
+    expected_data_path = _repository_path(repository_root, data_path)
+    if _repository_path(repository_root, configured_data_path) != expected_data_path:
+        raise TrainingDatasetManifestError(
+            "Configured corrected feature path does not match the final "
+            f"training DATA_PATH: {configured_data_path!r} != {str(data_path)!r}."
+        )
+
+    manifest_relative_path = str(sample_configuration["split_manifest_file"])
+    manifest_path = _repository_path(repository_root, manifest_relative_path)
+    if not manifest_path.is_file():
+        raise TrainingDatasetManifestError(
+            f"Configured CP6 split manifest is missing: {manifest_path}."
+        )
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise TrainingDatasetManifestError(
+            f"Configured CP6 split manifest is not readable JSON: {manifest_path}."
+        ) from exc
+    if not isinstance(manifest, Mapping):
+        raise TrainingDatasetManifestError(
+            "Configured CP6 split manifest must contain a JSON object."
+        )
+    if manifest.get("artifact_kind") != "corrected_causal_feature_dataset":
+        raise TrainingDatasetManifestError(
+            "CP6 split manifest artifact_kind must be "
+            "'corrected_causal_feature_dataset'."
+        )
+    if manifest.get("configuration_sha256") != configuration.sha256:
+        raise TrainingDatasetManifestError(
+            "CP6 split manifest configuration SHA-256 does not match the "
+            "current resolved configuration."
+        )
+
+    output = manifest.get("output")
+    if not isinstance(output, Mapping):
+        raise TrainingDatasetManifestError(
+            "CP6 split manifest output must be a JSON object."
+        )
+    manifest_output_path = output.get("path")
+    if not isinstance(manifest_output_path, str) or not manifest_output_path:
+        raise TrainingDatasetManifestError(
+            "CP6 split manifest output.path must be a nonempty string."
+        )
+    if (
+        _repository_path(repository_root, manifest_output_path)
+        != expected_data_path
+    ):
+        raise TrainingDatasetManifestError(
+            "CP6 split manifest output.path does not match the final "
+            f"training DATA_PATH: {manifest_output_path!r} != {str(data_path)!r}."
+        )
+
+    dataset_sha256 = sha256_file(expected_data_path)
+    if output.get("sha256") != dataset_sha256:
+        raise TrainingDatasetManifestError(
+            "CP6 split manifest dataset SHA-256 does not match the exact "
+            "Parquet bytes."
+        )
+    footer = parquet_metadata(expected_data_path)
+    for field in ("rows", "columns"):
+        recorded = output.get(field)
+        if type(recorded) is not int or recorded != footer[field]:
+            raise TrainingDatasetManifestError(
+                f"CP6 split manifest output.{field} does not match the "
+                "Parquet footer."
+            )
+    schema_sha256 = canonical_sha256(footer["schema"])
+    if output.get("schema_sha256") != schema_sha256:
+        raise TrainingDatasetManifestError(
+            "CP6 split manifest schema SHA-256 does not match the Parquet footer."
+        )
+
+    return {
+        "columns": footer["columns"],
+        "dataset_path": str(data_path),
+        "dataset_sha256": dataset_sha256,
+        "manifest_path": manifest_relative_path,
+        "manifest_sha256": sha256_file(manifest_path),
+        "rows": footer["rows"],
+        "schema_sha256": schema_sha256,
+    }
 
 
 def final_random_forest_artifact_path(
@@ -178,6 +285,11 @@ def main() -> None:
     configuration = load_resolved_configuration(
         CONFIG_DIRECTORY
     )
+    dataset_identity = validate_training_dataset_manifest(
+        configuration,
+        data_path=DATA_PATH,
+        repository_root=Path("."),
+    )
     target_column = str(
         configuration.values["model"]["target"]["name"]
     )
@@ -248,6 +360,7 @@ def main() -> None:
     metadata = {
         "configuration_sha256": configuration.sha256,
         "data_path": str(DATA_PATH),
+        "dataset_identity": dataset_identity,
         "training_split": "train",
         "training_rows": len(train),
         "target": {

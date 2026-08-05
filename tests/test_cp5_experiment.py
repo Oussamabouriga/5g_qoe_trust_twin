@@ -60,6 +60,21 @@ def test_final_training_requests_only_train_partition(
         "load_resolved_configuration",
         Mock(return_value=_repository_configuration()),
     )
+    monkeypatch.setattr(
+        final_training,
+        "validate_training_dataset_manifest",
+        Mock(
+            return_value={
+                "columns": 1,
+                "dataset_path": "synthetic.parquet",
+                "dataset_sha256": "a" * 64,
+                "manifest_path": "synthetic-manifest.json",
+                "manifest_sha256": "b" * 64,
+                "rows": 1,
+                "schema_sha256": "c" * 64,
+            }
+        ),
+    )
     monkeypatch.setattr(final_training.pd, "read_parquet", parquet_read)
 
     with pytest.raises(_StopAtPartitionRead):

@@ -125,12 +125,30 @@ def main() -> None:
         ),
     )
 
-    frame = pd.read_parquet(DATA_PATH)
+    required_columns = list(
+        dict.fromkeys(
+            [
+                "session_id",
+                "user_id",
+                "timestamp",
+                "future_timestamp",
+                "split",
+                TARGET_COLUMN,
+                *feature_names,
+            ]
+        )
+    )
+    frame = pd.read_parquet(
+        DATA_PATH,
+        columns=required_columns,
+        filters=[("split", "==", "test")],
+    )
+    if not frame["split"].eq("test").all():
+        raise ValueError("Final trust inference received non-test rows.")
+    if frame[TARGET_COLUMN].isna().any():
+        raise ValueError("Final trust inference received missing test targets.")
 
-    test = frame[
-        frame["split"].eq("test")
-        & frame[TARGET_COLUMN].notna()
-    ].copy()
+    test = frame.copy()
 
     test[TARGET_COLUMN] = test[
         TARGET_COLUMN

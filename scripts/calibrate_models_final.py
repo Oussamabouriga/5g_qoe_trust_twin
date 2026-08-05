@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 from pathlib import Path
 
 import joblib
@@ -29,6 +30,13 @@ from qoe_twin.metrics import (
     find_best_f1_threshold,
 )
 from qoe_twin.splitting import split_validation_chronologically
+from qoe_twin.trust import (
+    TrustPolicy,
+    calculate_configured_reliability_score,
+    calculate_data_quality,
+    calculate_prediction_stability,
+    select_validation_abstention_threshold,
+)
 
 DATA_PATH = Path(
     "data/processed/qoe_features_final.parquet"
@@ -41,6 +49,9 @@ TABLE_DIRECTORY = Path("results/tables")
 METRIC_DIRECTORY = Path("results/metrics")
 PREDICTION_DIRECTORY = Path("results/predictions")
 CONFIG_DIRECTORY = Path("configs")
+RISK_COVERAGE_PATH = (
+    TABLE_DIRECTORY / "final_rf_validation_risk_coverage.csv"
+)
 
 def save_final_random_forest_calibrator(
     calibrator: ProbabilityCalibrator,
@@ -207,6 +218,70 @@ def save_selection_predictions(
     )
 
 
+def build_validation_trust_scores(
+    selection: pd.DataFrame,
+    probability: np.ndarray,
+    *,
+    target_column: str,
+    feature_names: list[str],
+    decision_threshold: float,
+    validation_f1: float,
+    validation_ece: float,
+    policy: TrustPolicy,
+) -> pd.DataFrame:
+    """Calculate threshold-independent trust scores on validation half two."""
+    probabilities = np.asarray(probability, dtype=float).reshape(-1)
+    if len(selection) != len(probabilities):
+        raise ValueError(
+            "Selection probabilities must align one-to-one with validation rows."
+        )
+
+    ordered = selection.copy()
+    ordered["calibrated_probability"] = probabilities
+    ordered = ordered.sort_values(
+        ["timestamp", "session_id"],
+        kind="stable",
+    ).reset_index(drop=True)
+
+    previous_probability_by_session: dict[str, list[float]] = defaultdict(list)
+    records: list[dict[str, object]] = []
+
+    for _, row in ordered.iterrows():
+        session_id = str(row["session_id"])
+        selected_probability = float(row["calibrated_probability"])
+        previous_probabilities = previous_probability_by_session[session_id]
+        stability = calculate_prediction_stability(
+            selected_probability,
+            previous_probabilities,
+            window=5,
+        )
+        data_quality = calculate_data_quality(row, feature_names)
+        trust_score = calculate_configured_reliability_score(
+            probability=selected_probability,
+            decision_threshold=decision_threshold,
+            validation_f1=validation_f1,
+            validation_ece=validation_ece,
+            data_quality=data_quality,
+            prediction_stability=stability,
+            policy=policy,
+        )
+        records.append(
+            {
+                "session_id": session_id,
+                "timestamp": row["timestamp"],
+                "split": "validation",
+                "target": int(row[target_column]),
+                "prediction": int(
+                    selected_probability >= decision_threshold
+                ),
+                "trust_score": trust_score,
+            }
+        )
+        previous_probabilities.append(selected_probability)
+
+    return pd.DataFrame(records)
+
+
 def main() -> None:
     """Calibrate and compare model probabilities."""
     final_random_forest_path = (
@@ -260,6 +335,10 @@ def main() -> None:
     validation[target_column] = (
         validation[target_column].astype(int)
     )
+    validation = validation.sort_values(
+        ["timestamp", "session_id"],
+        kind="stable",
+    ).reset_index(drop=True)
 
     calibration_frame, selection_frame = (
         split_validation_chronologically(
@@ -317,10 +396,8 @@ def main() -> None:
     threshold_rows: list[pd.DataFrame] = []
     reliability_rows: list[pd.DataFrame] = []
 
-    selected_configuration: dict[
-        str,
-        dict[str, float | str],
-    ] = {}
+    selected_configuration: dict[str, dict[str, object]] = {}
+    selected_rf_probability: np.ndarray | None = None
 
     print("CALIBRATION DATA")
     print("=" * 70)
@@ -491,6 +568,66 @@ def main() -> None:
             ),
         }
 
+        if model_name == "cross_layer_random_forest":
+            selected_rf_probability = probability_variants[
+                str(best["calibration_method"])
+            ]
+
+    if selected_rf_probability is None:
+        raise RuntimeError(
+            "Final Random Forest validation probabilities were not produced."
+        )
+
+    selected_rf = selected_configuration["cross_layer_random_forest"]
+    trust_policy = TrustPolicy.from_mapping(
+        configuration.values["trust"]
+    )
+    validation_trust = build_validation_trust_scores(
+        selection_frame,
+        selected_rf_probability,
+        target_column=target_column,
+        feature_names=cross_features,
+        decision_threshold=float(selected_rf["decision_threshold"]),
+        validation_f1=float(selected_rf["f1"]),
+        validation_ece=float(selected_rf["expected_calibration_error"]),
+        policy=trust_policy,
+    )
+    abstention_threshold, risk_coverage = (
+        select_validation_abstention_threshold(
+            validation_trust,
+            target_column="target",
+            prediction_column="prediction",
+            minimum_coverage=trust_policy.minimum_coverage,
+        )
+    )
+    risk_coverage["selective_accuracy"] = (
+        1.0 - risk_coverage["selective_risk"]
+    )
+    risk_coverage["minimum_coverage"] = trust_policy.minimum_coverage
+    risk_coverage["selected"] = risk_coverage[
+        "abstention_threshold"
+    ].eq(abstention_threshold)
+    selected_risk = risk_coverage.loc[
+        risk_coverage["selected"]
+    ].iloc[0]
+
+    selected_rf.update(
+        {
+            "abstention_threshold": abstention_threshold,
+            "abstention_minimum_coverage": trust_policy.minimum_coverage,
+            "abstention_validation_coverage": float(
+                selected_risk["coverage"]
+            ),
+            "abstention_validation_selective_accuracy": float(
+                selected_risk["selective_accuracy"]
+            ),
+            "abstention_validation_selective_risk": float(
+                selected_risk["selective_risk"]
+            ),
+        }
+    )
+    risk_coverage.to_csv(RISK_COVERAGE_PATH, index=False)
+
     comparison = pd.DataFrame(
         result_rows
     )
@@ -553,7 +690,34 @@ def main() -> None:
     )
 
     selection_document = {
+        "schema_version": 1,
         "configuration_sha256": configuration.sha256,
+        "selection_policy": {
+            "calibration_method": (
+                "minimum expected_calibration_error, then minimum brier_score, "
+                "then maximum f1"
+            ),
+            "decision_threshold": (
+                "maximum validation-half-two F1, then precision, on the frozen "
+                "0.05-to-0.95 grid with 0.01 step"
+            ),
+            "abstention_threshold": (
+                "minimum selective risk subject to YAML minimum coverage; "
+                "ties prefer higher coverage then higher threshold"
+            ),
+        },
+        "validation_periods": {
+            "calibrator_fit": {
+                "rows": len(calibration_frame),
+                "start_timestamp": calibration_frame["timestamp"].min().isoformat(),
+                "end_timestamp": calibration_frame["timestamp"].max().isoformat(),
+            },
+            "selection": {
+                "rows": len(selection_frame),
+                "start_timestamp": selection_frame["timestamp"].min().isoformat(),
+                "end_timestamp": selection_frame["timestamp"].max().isoformat(),
+            },
+        },
         **selected_configuration,
     }
     selection_path.write_text(
@@ -592,6 +756,7 @@ def main() -> None:
 
     print("\nSaved:")
     print(f"- {comparison_path}")
+    print(f"- {RISK_COVERAGE_PATH}")
     print(f"- {selection_path}")
 
 

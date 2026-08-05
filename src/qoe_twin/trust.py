@@ -198,6 +198,79 @@ def calculate_configured_trust(
         {"abstention_threshold": abstention_threshold},
         "abstention_threshold",
     )
+    (
+        trust_score,
+        confidence,
+        validation_performance,
+        calibration_quality,
+        usable_data,
+        stability,
+    ) = _configured_reliability_components(
+        probability=probability,
+        decision_threshold=decision_threshold,
+        validation_f1=validation_f1,
+        validation_ece=validation_ece,
+        data_quality=data_quality,
+        prediction_stability=prediction_stability,
+        policy=policy,
+    )
+
+    if trust_score >= policy.high_level:
+        trust_level = "high"
+    elif trust_score >= policy.medium_level:
+        trust_level = "medium"
+    else:
+        trust_level = "low"
+
+    return ConfiguredTrustResult(
+        trust_score=trust_score,
+        trust_level=trust_level,
+        abstain=(
+            policy.abstention_enabled
+            and trust_score < threshold
+        ),
+        model_confidence=confidence,
+        validation_performance=validation_performance,
+        calibration_quality=calibration_quality,
+        data_quality=usable_data,
+        prediction_stability=stability,
+    )
+
+
+def calculate_configured_reliability_score(
+    *,
+    probability: float,
+    decision_threshold: float,
+    validation_f1: float,
+    validation_ece: float,
+    data_quality: float,
+    prediction_stability: float,
+    policy: TrustPolicy,
+) -> float:
+    """Calculate the YAML-defined score before selecting abstention."""
+    trust_score, *_ = _configured_reliability_components(
+        probability=probability,
+        decision_threshold=decision_threshold,
+        validation_f1=validation_f1,
+        validation_ece=validation_ece,
+        data_quality=data_quality,
+        prediction_stability=prediction_stability,
+        policy=policy,
+    )
+    return trust_score
+
+
+def _configured_reliability_components(
+    *,
+    probability: float,
+    decision_threshold: float,
+    validation_f1: float,
+    validation_ece: float,
+    data_quality: float,
+    prediction_stability: float,
+    policy: TrustPolicy,
+) -> tuple[float, float, float, float, float, float]:
+    """Return validated score components without an abstention decision."""
     confidence = probability_confidence(
         probability,
         decision_threshold,
@@ -234,25 +307,13 @@ def calculate_configured_trust(
         )
     )
 
-    if trust_score >= policy.high_level:
-        trust_level = "high"
-    elif trust_score >= policy.medium_level:
-        trust_level = "medium"
-    else:
-        trust_level = "low"
-
-    return ConfiguredTrustResult(
-        trust_score=trust_score,
-        trust_level=trust_level,
-        abstain=(
-            policy.abstention_enabled
-            and trust_score < threshold
-        ),
-        model_confidence=confidence,
-        validation_performance=validation_performance,
-        calibration_quality=calibration_quality,
-        data_quality=usable_data,
-        prediction_stability=stability,
+    return (
+        trust_score,
+        confidence,
+        validation_performance,
+        calibration_quality,
+        usable_data,
+        stability,
     )
 
 

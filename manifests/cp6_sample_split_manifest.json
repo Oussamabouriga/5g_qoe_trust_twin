@@ -1,6 +1,6 @@
 {
   "artifact_kind": "corrected_causal_feature_dataset",
-  "configuration_sha256": "2f42ff61bb5cf30b0289365dc4bca589533c74e72b3b20da822cce4fcfab152c",
+  "configuration_sha256": "76c11271c2a06feaca05f383f397e694a7f58c56110a95f1e75e8c7b99de5c80",
   "input": {
     "byte_size": 11842202,
     "columns": 20,
