@@ -16,7 +16,6 @@ from qoe_twin.grounding_validator import GroundingValidator
 from qoe_twin.openai_client import OpenAIExplanationClient
 from qoe_twin.prompt_builder import build_prompt
 
-
 PREDICTION_PATH = Path(
     "results/predictions/final_trusted_predictions.parquet"
 )
@@ -204,10 +203,6 @@ def build_row_evidence(
             float(row["plr_percent"]),
             4,
         ),
-        "lead_time_seconds": round(
-            float(row["prediction_lead_seconds"]),
-            4,
-        ),
     }
 
     return build_evidence(raw)
@@ -232,7 +227,6 @@ def main() -> None:
         "capacity_margin_mbps",
         "throughput_to_bitrate_ratio",
         "plr_percent",
-        "prediction_lead_seconds",
     ]
 
     print(f"Reading {FEATURE_PATH}")
@@ -252,11 +246,6 @@ def main() -> None:
         validate="one_to_one",
         suffixes=("", "_feature"),
     )
-
-    if "prediction_lead_seconds_feature" in frame.columns:
-        frame["prediction_lead_seconds"] = frame[
-            "prediction_lead_seconds_feature"
-        ]
 
     selected = select_diverse_cases(
         frame=frame,
@@ -337,6 +326,7 @@ def main() -> None:
             ),
             "abstain": bool(row["abstain"]),
             "evidence": evidence,
+            "prompt": prompt,
             "explanation": explanation_data,
             "schema_valid": schema_valid,
             "grounding_valid": grounding_valid,
@@ -397,6 +387,9 @@ def main() -> None:
                     ]
                 ),
                 "abstain": record["abstain"],
+                "prediction": record["evidence"][
+                    "prediction"
+                ],
                 "schema_valid": (
                     record["schema_valid"]
                 ),
@@ -410,10 +403,11 @@ def main() -> None:
                 "evidence_json": json.dumps(
                     record["evidence"]
                 ),
+                "prompt": record["prompt"],
                 "explanation_json": json.dumps(
                     record["explanation"]
                 ),
-                "validation_errors_json": (
+                "automatic_validation_errors": (
                     json.dumps(
                         record[
                             "validation_errors"

@@ -514,42 +514,41 @@ results/metrics/selected_calibration_configuration_final.json
 
 ## 15. Apply trust scoring and abstention
 
+This stage runs during CP8, after validation has selected and frozen both the
+model decision threshold and the abstention threshold:
+
 ```bash
 python scripts/apply_trust_final.py
 ```
 
-Validation quality:
+Probability confidence is the normalized distance from the selected model
+decision threshold. It is zero at that threshold and approaches one toward
+either probability endpoint; it is not calculated around a fixed `0.50`.
+
+The only authoritative trust equation is the four-term policy in
+`configs/trust.yaml`:
 
 ```text
-validation_quality =
-    0.70 × validation_F1
-    + 0.30 × (1 − validation_ECE)
-```
+validation_performance = validation_F1
+calibration_quality = 1 - validation_ECE
 
-Trust score:
-
-```text
 trust_score =
-    0.45 × probability_confidence
-    + 0.35 × validation_quality
-    + 0.10 × data_quality
-    + 0.10 × prediction_stability
+    0.40 * threshold_aware_probability_confidence
+    + 0.30 * validation_performance
+    + 0.20 * calibration_quality
+    + 0.10 * data_quality
 ```
 
-Trust levels:
+The weights are loaded from the strictly validated YAML configuration. There
+is no alternative hardcoded production formula. The resulting score is a
+**heuristic reliability score**, not a probability that a prediction is
+correct.
 
-```text
-High:   trust_score ≥ 0.80
-Medium: 0.55 ≤ trust_score < 0.80
-Low:    trust_score < 0.55
-```
-
-Decision:
-
-```text
-High or Medium → accept
-Low            → abstain
-```
+CP7 does not choose a numeric abstention threshold. CP8 will select it using
+only corrected validation predictions, minimizing selective risk subject to
+at least 90% coverage, freeze it before opening the test partition, and save a
+basic risk-versus-coverage table. Trust-level labels are descriptive and must
+not silently substitute for that validation-selected abstention decision.
 
 Outputs:
 
@@ -590,6 +589,26 @@ final_trust_distribution.pdf
 
 ## 17. Generate grounded LLM explanations
 
+The corrected explanation layer uses three separate prompts: poor QoE,
+acceptable QoE, and abstention. Operational evidence contains only approved
+fields available at prediction time. In particular, it excludes
+`prediction_lead_seconds`, future timestamps, future MOS, targets, and other
+future-derived information.
+
+Every proposed cause must cite the exact evidence keys that support it. When
+the evidence is insufficient, the explanation may state that limitation and
+return an empty cause list. Grounding validation rejects obvious prediction
+polarity contradictions, confident causal claims for abstentions, unsupported
+numbers, incorrect field attribution, and incompatible units.
+
+CP7 defines these contracts but does not call an LLM or generate final cases.
+After CP8 freezes corrected predictions, CP9 will generate the explanation
+batch and manually review at least 20 cases. The header-only review format is
+provided at `templates/llm_manual_review.csv`; it records the evidence, prompt,
+explanation, and reviewer judgments without claiming that review is complete.
+CP9 will record `correctness` and `completeness` as `0` or `1`, the two
+statement flags as `true` or `false`, and reviewer notes as free text.
+
 Confirm `.env`:
 
 ```dotenv
@@ -623,7 +642,9 @@ results/explanations/final_explanations.parquet
 results/explanations/llm_evaluation.json
 ```
 
-The LLM receives only approved evidence fields. It does not receive the target label, training data, or unrestricted raw histories.
+The LLM receives only approved decision-time evidence fields. It does not
+receive the target label, training data, unrestricted raw histories, or
+retrospective lead-time information.
 
 ---
 
@@ -866,6 +887,9 @@ find . -maxdepth 2
 - retain complete sessions when sampling;
 - never tune on the test set;
 - never expose the target label to the LLM;
+- never expose future-derived evidence to the LLM;
+- treat trust as a heuristic reliability score, not probability of correctness;
+- select abstention on validation with at least 90% coverage before test use;
 - reject explanations failing schema or grounding checks;
 - record dependency versions and random seeds.
 
@@ -888,12 +912,12 @@ find . -maxdepth 2
 
 - additional 5G and 6G datasets;
 - online recalibration;
-- risk–coverage curves;
+- richer selective-risk analysis beyond CP8's basic risk-versus-coverage table;
 - alternative abstention strategies;
 - temporal neural networks;
 - drift detection;
 - live stream ingestion;
-- human operator evaluation;
+- inter-rater studies beyond the mandatory CP9 manual review;
 - comparison of explanation models;
 - retrieval-grounded telecom knowledge;
 - API and dashboard deployment.

@@ -10,4 +10,4 @@ levels:
 
 abstention:
   enabled: true
-  minimum_trust: 0.55
+  minimum_coverage: 0.90

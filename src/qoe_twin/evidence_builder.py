@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-
-FIELDS = [
+FIELDS = (
     "prediction",
     "prediction_probability",
     "trust_score",
@@ -16,15 +15,15 @@ FIELDS = [
     "capacity_margin_mbps",
     "throughput_to_bitrate_ratio",
     "plr_percent",
-    "lead_time_seconds",
-]
+)
 
 
 def build_evidence(
     row: dict[str, Any],
 ) -> dict[str, Any]:
+    """Return only operational, present-time evidence fields."""
 
-    evidence = {}
+    evidence: dict[str, Any] = {}
 
     for field in FIELDS:
         if field in row:

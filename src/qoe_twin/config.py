@@ -491,7 +491,10 @@ _TRUST_SCHEMA = _mapping(
         "abstention": _mapping(
             {
                 "enabled": _boolean,
-                "minimum_trust": _UNIT_INTERVAL,
+                "minimum_coverage": _number(
+                    minimum=0.90,
+                    maximum=1.0,
+                ),
             }
         ),
         "levels": _mapping(

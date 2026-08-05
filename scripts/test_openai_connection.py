@@ -11,12 +11,12 @@ response = client.generate_json(
 You must return ONLY valid JSON.
 
 {
-  "prediction":"test",
-  "confidence":"high",
-  "summary":"connection successful",
+  "prediction":"future_poor_qoe",
+  "confidence":"low",
+  "summary":"Insufficient evidence is available in this connection test.",
   "likely_causes":[],
-  "recommended_operator_checks":[],
-  "limitations":"none"
+  "recommended_operator_checks":["Review supplied operational evidence."],
+  "limitations":"Insufficient evidence supports a specific cause."
 }
 """
 )

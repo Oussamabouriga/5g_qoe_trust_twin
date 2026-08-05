@@ -97,7 +97,7 @@ def _synthetic_documents(*, resolved_model_target: bool = False) -> dict[str, An
                 "data_quality_weight": 0.25,
             },
             "levels": {"high": 0.8, "medium": 0.4},
-            "abstention": {"enabled": True, "minimum_trust": 0.33},
+            "abstention": {"enabled": True, "minimum_coverage": 0.9},
         },
         "llm.yaml": {
             "openai": {
@@ -258,7 +258,7 @@ levels:
   medium: 0.4
 abstention:
   enabled: true
-  minimum_trust: 0.33
+  minimum_coverage: 0.90
 """.lstrip(),
         encoding="utf-8",
     )
@@ -304,6 +304,7 @@ def test_rejects_values_with_the_wrong_strict_type(
         ("model.yaml", ("models", "random_forest", "max_samples"), 1.01),
         ("model.yaml", ("calibration", "fit_fraction"), 1.0),
         ("trust.yaml", ("levels", "high"), 1.01),
+        ("trust.yaml", ("abstention", "minimum_coverage"), 0.89),
         ("llm.yaml", ("openai", "temperature"), 2.01),
         ("llm.yaml", ("openai", "maximum_retries"), -1),
     ],
@@ -617,6 +618,10 @@ def test_repository_configuration_freezes_cp5_experiment() -> None:
     assert loaded.values["model"]["calibration"] == {
         "fit_fraction": 0.5,
         "methods": ("sigmoid", "isotonic"),
+    }
+    assert loaded.values["trust"]["abstention"] == {
+        "enabled": True,
+        "minimum_coverage": 0.9,
     }
 
 

@@ -1,0 +1,1 @@
+case_id,prediction,evidence_json,prompt,explanation_json,automatic_validation_errors,reviewer_id,correctness,completeness,unsupported_statement_present,contradiction_present,review_notes

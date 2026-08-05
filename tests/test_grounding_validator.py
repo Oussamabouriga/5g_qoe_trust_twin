@@ -1,63 +1,57 @@
+"""Regression tests for citation-level numerical grounding."""
+
 from qoe_twin.explanation_schema import Explanation
 from qoe_twin.grounding_validator import GroundingValidator
 
 
-def test_grounding_passes() -> None:
+def test_cause_number_must_come_from_its_cited_field() -> None:
     explanation = Explanation(
-        prediction="Poor QoE",
+        prediction="future_poor_qoe",
         confidence="high",
-        summary="MOS is 2.1",
+        summary="The model predicts poor QoE.",
         likely_causes=[
-            "The current MOS is 2.1."
+            {
+                "statement": "Packet loss is 5.3 percent.",
+                "evidence_keys": ["plr_percent"],
+            }
         ],
-        recommended_operator_checks=[
-            "Inspect the current MOS."
-        ],
-        limitations="Only uses supplied evidence.",
+        recommended_operator_checks=["Inspect packet loss."],
+        limitations="Only supplied evidence was considered.",
     )
-
     evidence = {
-        "current_mos": 2.1
+        "prediction": "future_poor_qoe",
+        "trust_level": "high",
+        "throughput_mbps": 5.3,
+        "plr_percent": 2.4,
     }
 
-    validator = GroundingValidator()
+    valid, errors = GroundingValidator().validate(explanation, evidence)
 
-    valid, errors = validator.validate(
-        explanation,
-        evidence,
-    )
-
-    assert valid
-    assert errors == []
+    assert valid is False
+    assert any("not supported by its cited evidence keys" in error for error in errors)
 
 
-def test_grounding_rejects_fake_number() -> None:
+def test_model_metadata_cannot_be_cited_as_a_cause() -> None:
     explanation = Explanation(
-        prediction="Poor QoE",
+        prediction="future_poor_qoe",
         confidence="high",
-        summary="MOS is 9.9",
+        summary="The model predicts poor QoE.",
         likely_causes=[
-            "The current MOS is 9.9."
+            {
+                "statement": "The prediction probability is 0.81.",
+                "evidence_keys": ["prediction_probability"],
+            }
         ],
-        recommended_operator_checks=[
-            "Inspect the current MOS."
-        ],
-        limitations="Only uses supplied evidence.",
+        recommended_operator_checks=["Inspect service measurements."],
+        limitations="Only supplied evidence was considered.",
     )
-
     evidence = {
-        "current_mos": 2.1
+        "prediction": "future_poor_qoe",
+        "trust_level": "high",
+        "prediction_probability": 0.81,
     }
 
-    validator = GroundingValidator()
+    valid, errors = GroundingValidator().validate(explanation, evidence)
 
-    valid, errors = validator.validate(
-        explanation,
-        evidence,
-    )
-
-    assert not valid
-    assert any(
-        "Unsupported number: 9.9" in error
-        for error in errors
-    )
+    assert valid is False
+    assert any("non-causal evidence key" in error for error in errors)

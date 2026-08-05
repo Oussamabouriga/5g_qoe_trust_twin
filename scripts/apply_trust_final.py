@@ -20,9 +20,11 @@ from qoe_twin.features import (
     get_cross_layer_feature_names,
 )
 from qoe_twin.trust import (
+    TrustPolicy,
+    calculate_configured_trust,
     calculate_data_quality,
     calculate_prediction_stability,
-    calculate_trust,
+    require_selected_abstention_threshold,
 )
 
 DATA_PATH = Path(
@@ -90,6 +92,14 @@ def main() -> None:
         selected_configuration[
             "expected_calibration_error"
         ]
+    )
+    abstention_threshold = (
+        require_selected_abstention_threshold(
+            selected_configuration
+        )
+    )
+    trust_policy = TrustPolicy.from_mapping(
+        configuration_lineage.values["trust"]
     )
     (
         numeric_features,
@@ -183,13 +193,15 @@ def main() -> None:
             feature_names,
         )
 
-        trust = calculate_trust(
+        trust = calculate_configured_trust(
             probability=probability,
+            decision_threshold=decision_threshold,
             validation_f1=validation_f1,
             validation_ece=validation_ece,
             data_quality=data_quality,
             prediction_stability=stability,
-            abstention_threshold=0.55,
+            policy=trust_policy,
+            abstention_threshold=abstention_threshold,
         )
 
         prediction = int(
@@ -212,6 +224,9 @@ def main() -> None:
             "calibrated_probability": probability,
             "decision_threshold": (
                 decision_threshold
+            ),
+            "abstention_threshold": (
+                abstention_threshold
             ),
             "predicted_poor_qoe": prediction,
             **trust.to_dict(),

@@ -50,7 +50,19 @@ def _configuration(
     *,
     unresolved_paths: tuple[str, ...] = (),
 ) -> LoadedConfiguration:
-    values = {"synthetic": {"identity": identity}}
+    values = {
+        "synthetic": {"identity": identity},
+        "trust": {
+            "trust": {
+                "confidence_weight": 0.4,
+                "validation_performance_weight": 0.3,
+                "calibration_weight": 0.2,
+                "data_quality_weight": 0.1,
+            },
+            "levels": {"high": 0.8, "medium": 0.55},
+            "abstention": {"enabled": True, "minimum_coverage": 0.9},
+        },
+    }
     canonical = canonical_json(values)
     return LoadedConfiguration(
         values=values,
@@ -70,8 +82,18 @@ def _write_selected_configuration(
     path: Path,
     method: str,
     configuration: LoadedConfiguration | None = None,
+    *,
+    include_abstention_threshold: bool = True,
 ) -> Path:
     effective_configuration = configuration or _configuration()
+    selected = {
+        "calibration_method": method,
+        "decision_threshold": 0.4,
+        "f1": 0.75,
+        "expected_calibration_error": 0.05,
+    }
+    if include_abstention_threshold:
+        selected["abstention_threshold"] = 0.6
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(
@@ -79,12 +101,7 @@ def _write_selected_configuration(
                 "configuration_sha256": resolved_configuration_sha256(
                     effective_configuration
                 ),
-                "cross_layer_random_forest": {
-                    "calibration_method": method,
-                    "decision_threshold": 0.4,
-                    "f1": 0.75,
-                    "expected_calibration_error": 0.05,
-                }
+                "cross_layer_random_forest": selected,
             }
         ),
         encoding="utf-8",
@@ -486,6 +503,47 @@ def test_final_inference_routes_to_selected_calibrator_before_data_or_load(
         tmp_path
         / f"cross_layer_random_forest_{method}_final.joblib"
     )
+    parquet_read.assert_not_called()
+    joblib_load.assert_not_called()
+
+
+def test_final_inference_requires_cp8_abstention_selection_before_artifacts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    selection_path = _write_selected_configuration(
+        tmp_path / "selected.json",
+        "sigmoid",
+        include_abstention_threshold=False,
+    )
+    model_validation = Mock(
+        side_effect=AssertionError("model lineage must not be read")
+    )
+    parquet_read = Mock(
+        side_effect=AssertionError("pd.read_parquet must not be called")
+    )
+    joblib_load = Mock(
+        side_effect=AssertionError("joblib.load must not be called")
+    )
+
+    monkeypatch.setattr(final_inference, "CONFIGURATION_PATH", selection_path)
+    monkeypatch.setattr(
+        final_inference,
+        "load_resolved_configuration",
+        Mock(return_value=_configuration()),
+    )
+    monkeypatch.setattr(
+        final_inference,
+        "validate_model_lineage",
+        model_validation,
+    )
+    monkeypatch.setattr(final_inference.pd, "read_parquet", parquet_read)
+    monkeypatch.setattr(final_inference.joblib, "load", joblib_load)
+
+    with pytest.raises(ValueError, match="CP8 validation-selected"):
+        final_inference.main()
+
+    model_validation.assert_not_called()
     parquet_read.assert_not_called()
     joblib_load.assert_not_called()
 
