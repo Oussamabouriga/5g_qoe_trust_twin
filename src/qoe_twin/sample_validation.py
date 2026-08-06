@@ -1,4 +1,4 @@
-"""Validation for the frozen, manageable CP6 modeling sample."""
+"""Validation for the frozen, manageable modeling sample."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from qoe_twin.target import TRAJECTORY_COLUMNS, add_future_target, add_sessions
 
 
 class SampleValidationError(ValueError):
-    """Raised when the audited CP6 input does not satisfy its contract."""
+    """Raised when the audited input does not satisfy its contract."""
 
 
 BASE_SAMPLE_COLUMNS = (
@@ -222,18 +222,18 @@ def validate_audited_sample_artifact(
         root
     ):
         raise SampleValidationError(
-            "CP6 artifact paths must remain inside the repository."
+            "Sample artifact paths must remain inside the repository."
         )
 
     manifest_hash = sha256_file(manifest_path)
     if manifest_hash != expected_provenance_manifest_sha256:
         raise SampleValidationError(
-            "The provenance manifest SHA-256 does not match the frozen CP6 value."
+            "The provenance manifest SHA-256 does not match the frozen value."
         )
     source_hash = sha256_file(source_path)
     if source_hash != expected_source_sha256:
         raise SampleValidationError(
-            "The manageable sample SHA-256 does not match the frozen CP6 value."
+            "The manageable sample SHA-256 does not match the frozen value."
         )
 
     manifest = _load_manifest(manifest_path)
@@ -276,7 +276,7 @@ def validate_audited_sample_artifact(
     schema = _schema_tuples(actual_metadata["schema"])
     if schema != EXPECTED_ARROW_SCHEMA:
         raise SampleValidationError(
-            "The manageable sample schema is not the CP6 schema."
+            "The manageable sample schema does not match the frozen schema."
         )
 
     raw_contract = manifest.get("raw_tsv_contract")

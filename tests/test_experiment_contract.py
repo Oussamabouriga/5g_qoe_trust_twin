@@ -1,4 +1,4 @@
-"""Focused tests for the frozen CP5 scientific protocol."""
+"""Focused tests for the frozen scientific experiment contract."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ from unittest.mock import Mock
 
 import pytest
 
-import scripts.calibrate_models_final as final_calibration
-import scripts.train_models_final as final_training
+import scripts.calibrate_models as final_calibration
+import scripts.train_models as final_training
 from qoe_twin.artifact_lineage import (
     ArtifactLineageError,
     load_selected_final_calibrator,

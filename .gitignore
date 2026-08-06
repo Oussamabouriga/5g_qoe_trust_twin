@@ -58,6 +58,9 @@ results/explanations/*
 !results/predictions/.gitkeep
 !results/evidence/.gitkeep
 !results/explanations/.gitkeep
+!results/explanations/final_explanations.jsonl
+!results/explanations/final_manual_review.csv
+!results/metrics/llm_human_evaluation.json
 
 # Report build files
 report/*.aux

@@ -1,100 +1,171 @@
-"""Apply trust scoring and abstention to calibrated predictions."""
+"""Apply trust scoring and abstention to calibrated model predictions."""
 
 from __future__ import annotations
 
-import json
 from collections import defaultdict
 from pathlib import Path
 
 import joblib
 import pandas as pd
 
+from qoe_twin.artifact_lineage import (
+    load_resolved_configuration,
+    load_selected_final_calibrator,
+    require_feature_columns,
+    validate_calibrator_lineage,
+    validate_model_lineage,
+    write_prediction_lineage,
+)
 from qoe_twin.features import (
     get_cross_layer_feature_names,
 )
 from qoe_twin.trust import (
+    TrustPolicy,
+    calculate_configured_trust,
     calculate_data_quality,
     calculate_prediction_stability,
-    calculate_trust,
+    require_selected_abstention_threshold,
 )
 
-
 DATA_PATH = Path(
-    "data/processed/qoe_features_prototype.parquet"
+    "data/processed/qoe_features_final.parquet"
 )
 
 MODEL_PATH = Path(
     "models/uncalibrated/"
-    "cross_layer_random_forest_prototype.joblib"
+    "cross_layer_random_forest_final.joblib"
 )
 
-CALIBRATOR_PATH = Path(
-    "models/calibrated/"
-    "cross_layer_random_forest_isotonic.joblib"
-)
+CALIBRATED_DIRECTORY = Path("models/calibrated")
 
 CONFIGURATION_PATH = Path(
     "results/metrics/"
-    "selected_calibration_configuration.json"
+    "selected_calibration_configuration_final.json"
 )
 
 OUTPUT_PATH = Path(
     "results/predictions/"
-    "prototype_trusted_predictions.parquet"
+    "final_trusted_predictions.parquet"
 )
 
 SUMMARY_PATH = Path(
     "results/tables/"
-    "prototype_trust_summary.csv"
+    "final_trust_summary.csv"
 )
+CONFIG_DIRECTORY = Path("configs")
 
 TARGET_COLUMN = "future_poor_qoe"
 
 
+def final_random_forest_feature_lists() -> tuple[list[str], list[str]]:
+    """Return the exact ordered feature contract used by the final RF."""
+    categorical_features = ["resolution"]
+    numeric_features = [
+        feature
+        for feature in get_cross_layer_feature_names()
+        if feature not in categorical_features
+    ]
+    return numeric_features, categorical_features
+
+
 def main() -> None:
     """Generate calibrated predictions, trust scores and abstentions."""
-    frame = pd.read_parquet(DATA_PATH)
+    configuration_lineage = load_resolved_configuration(
+        CONFIG_DIRECTORY
+    )
+    (
+        calibration_method,
+        calibrator_path,
+        selected_configuration,
+    ) = load_selected_final_calibrator(
+        CONFIGURATION_PATH,
+        CALIBRATED_DIRECTORY,
+        configuration=configuration_lineage,
+    )
+    decision_threshold = float(
+        selected_configuration["decision_threshold"]
+    )
+    validation_f1 = float(
+        selected_configuration["f1"]
+    )
+    validation_ece = float(
+        selected_configuration[
+            "expected_calibration_error"
+        ]
+    )
+    abstention_threshold = (
+        require_selected_abstention_threshold(
+            selected_configuration
+        )
+    )
+    trust_policy = TrustPolicy.from_mapping(
+        configuration_lineage.values["trust"]
+    )
+    (
+        numeric_features,
+        categorical_features,
+    ) = final_random_forest_feature_lists()
+    feature_names = [
+        *numeric_features,
+        *categorical_features,
+    ]
+    model_lineage = validate_model_lineage(
+        MODEL_PATH,
+        configuration=configuration_lineage,
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+    )
+    calibrator_lineage = validate_calibrator_lineage(
+        calibrator_path,
+        configuration=configuration_lineage,
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+        expected_parent_model_sha256=(
+            model_lineage.artifact_sha256
+        ),
+    )
 
-    test = frame[
-        frame["split"].eq("test")
-        & frame[TARGET_COLUMN].notna()
-    ].copy()
+    required_columns = list(
+        dict.fromkeys(
+            [
+                "session_id",
+                "user_id",
+                "timestamp",
+                "future_timestamp",
+                "split",
+                TARGET_COLUMN,
+                *feature_names,
+            ]
+        )
+    )
+    frame = pd.read_parquet(
+        DATA_PATH,
+        columns=required_columns,
+        filters=[("split", "==", "test")],
+    )
+    if not frame["split"].eq("test").all():
+        raise ValueError("Final trust inference received non-test rows.")
+    if frame[TARGET_COLUMN].isna().any():
+        raise ValueError("Final trust inference received missing test targets.")
+
+    test = frame.copy()
 
     test[TARGET_COLUMN] = test[
         TARGET_COLUMN
     ].astype(int)
 
-    feature_names = [
-        feature
-        for feature in get_cross_layer_feature_names()
-        if feature in test.columns
-    ]
+    require_feature_columns(
+        test.columns,
+        feature_names,
+        context="final trusted prediction inference",
+    )
 
     model = joblib.load(MODEL_PATH)
-    calibrator = joblib.load(CALIBRATOR_PATH)
-
-    configuration = json.loads(
-        CONFIGURATION_PATH.read_text(
-            encoding="utf-8"
-        )
-    )["cross_layer_random_forest"]
-
-    decision_threshold = float(
-        configuration["decision_threshold"]
-    )
-
-    validation_f1 = float(
-        configuration["f1"]
-    )
-
-    validation_ece = float(
-        configuration[
-            "expected_calibration_error"
-        ]
-    )
+    calibrator = joblib.load(calibrator_path)
 
     test = test.sort_values(
-        ["session_id", "timestamp"]
+        ["timestamp", "session_id"],
+        kind="stable",
     ).reset_index(drop=True)
 
     raw_probability = model.predict_proba(
@@ -140,13 +211,15 @@ def main() -> None:
             feature_names,
         )
 
-        trust = calculate_trust(
+        trust = calculate_configured_trust(
             probability=probability,
+            decision_threshold=decision_threshold,
             validation_f1=validation_f1,
             validation_ece=validation_ece,
             data_quality=data_quality,
             prediction_stability=stability,
-            abstention_threshold=0.55,
+            policy=trust_policy,
+            abstention_threshold=abstention_threshold,
         )
 
         prediction = int(
@@ -169,6 +242,9 @@ def main() -> None:
             "calibrated_probability": probability,
             "decision_threshold": (
                 decision_threshold
+            ),
+            "abstention_threshold": (
+                abstention_threshold
             ),
             "predicted_poor_qoe": prediction,
             **trust.to_dict(),
@@ -197,6 +273,16 @@ def main() -> None:
     trusted.to_parquet(
         OUTPUT_PATH,
         index=False,
+    )
+    write_prediction_lineage(
+        OUTPUT_PATH,
+        configuration=configuration_lineage,
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+        parent_model_sha256=model_lineage.artifact_sha256,
+        parent_calibrator_sha256=(
+            calibrator_lineage.artifact_sha256
+        ),
     )
 
     summary = (
@@ -287,9 +373,10 @@ def main() -> None:
         f"{accepted_accuracy:.4f}"
     )
 
-    print(f"\nSaved:")
+    print("\nSaved:")
     print(f"- {OUTPUT_PATH}")
     print(f"- {SUMMARY_PATH}")
+    print(f"- calibration method: {calibration_method}")
 
 
 if __name__ == "__main__":

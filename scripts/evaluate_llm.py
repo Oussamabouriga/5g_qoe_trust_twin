@@ -1,4 +1,4 @@
-"""Validate and summarize the completed CP9 human review."""
+"""Validate and summarize the completed explanation human review."""
 
 from __future__ import annotations
 
@@ -15,13 +15,13 @@ from qoe_twin.explanation_schema import Explanation
 from qoe_twin.grounding_validator import GroundingValidator
 
 COMPLETED_EXPLANATION_PATH = Path(
-    "results/explanations/cp9_phase_a_completed.jsonl"
+    "results/explanations/final_explanations.jsonl"
 )
 COMPLETED_REVIEW_PATH = Path(
-    "results/explanations/cp9_phase_a_manual_review_completed.csv"
+    "results/explanations/final_manual_review.csv"
 )
-SUMMARY_PATH = Path("results/metrics/cp9_human_evaluation.json")
-TABLE_PATH = Path("results/tables/cp9_human_evaluation.csv")
+SUMMARY_PATH = Path("results/metrics/llm_human_evaluation.json")
+TABLE_PATH = Path("results/tables/llm_human_evaluation.csv")
 
 CATEGORY_PREDICTIONS = {
     "accepted_poor_qoe": "future_poor_qoe",
@@ -157,7 +157,7 @@ def evaluate_human_review(
     reviews = read_review_csv(review_path)
     if len(explanations) != 30 or len(reviews) != 30:
         raise ValueError(
-            "CP9 human evaluation requires exactly 30 explanation and review rows."
+            "Human evaluation requires exactly 30 explanation and review rows."
         )
 
     explanation_map = _unique_case_map(explanations, "Completed explanation JSONL")
@@ -168,7 +168,7 @@ def evaluate_human_review(
     category_counts = Counter(record.get("category") for record in explanations)
     if category_counts != Counter({category: 10 for category in CATEGORY_PREDICTIONS}):
         raise ValueError(
-            "CP9 categories must contain exactly 10 accepted poor-QoE, "
+            "Review categories must contain exactly 10 accepted poor-QoE, "
             "10 accepted acceptable-QoE and 10 abstention cases."
         )
 
@@ -321,7 +321,7 @@ def write_evaluation_outputs(
 
 
 def main() -> None:
-    """Validate completed reviews and save the CP9 summary artifacts."""
+    """Validate completed reviews and save the summary artifacts."""
     evaluation = evaluate_human_review(
         COMPLETED_EXPLANATION_PATH, COMPLETED_REVIEW_PATH
     )

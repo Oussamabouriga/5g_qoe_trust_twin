@@ -1,4 +1,4 @@
-"""Focused synthetic checks for CP9 human-review aggregation."""
+"""Focused synthetic checks for human-review aggregation."""
 
 from __future__ import annotations
 

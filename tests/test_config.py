@@ -568,7 +568,7 @@ def test_loader_rejects_nonfrozen_calibration_candidates(
         load_config_directory(_write_documents(tmp_path, documents))
 
 
-def test_repository_configuration_freezes_cp5_experiment() -> None:
+def test_repository_configuration_freezes_experiment() -> None:
     repository_root = Path(__file__).resolve().parents[1]
     loaded = load_config_directory(repository_root / "configs")
 

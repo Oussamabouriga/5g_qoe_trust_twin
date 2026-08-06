@@ -171,10 +171,10 @@ def _contains_blocked_value(value: Any) -> bool:
 def resolved_configuration_sha256(
     configuration: LoadedConfiguration,
 ) -> str:
-    """Return a CP3 hash only when the configuration is resolved and intact."""
+    """Return a hash only when the configuration is resolved and intact."""
     if not isinstance(configuration, LoadedConfiguration):
         raise ArtifactLineageError(
-            "configuration must be a CP3 LoadedConfiguration instance."
+            "configuration must be a LoadedConfiguration instance."
         )
     if configuration.unresolved_paths:
         unresolved = ", ".join(configuration.unresolved_paths)
@@ -210,11 +210,11 @@ def resolved_configuration_sha256(
 def load_resolved_configuration(
     directory: str | Path,
 ) -> LoadedConfiguration:
-    """Load the four CP3 YAML files and fail when any value is unresolved."""
+    """Load the four YAML files and fail when any value is unresolved."""
     try:
         configuration = load_config_directory(directory)
     except ConfigurationError as exc:
-        raise ArtifactLineageError(f"Invalid CP3 configuration: {exc}") from exc
+        raise ArtifactLineageError(f"Invalid configuration: {exc}") from exc
     resolved_configuration_sha256(configuration)
     return configuration
 
@@ -476,7 +476,7 @@ def load_selected_final_calibrator(
     if recorded_configuration_hash != configuration_hash:
         raise ArtifactLineageError(
             "Selected calibration configuration SHA-256 does not match "
-            "the resolved CP3 configuration."
+            "the resolved configuration."
         )
     selected = payload.get("cross_layer_random_forest")
     if type(selected) is not dict:

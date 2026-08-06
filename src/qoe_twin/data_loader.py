@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pandas as pd
 
-
 FILENAME_PATTERN = re.compile(
     r"MOS_BS_(?P<base_station>\d+)_"
     r"(?P<mobility>[A-Za-z]+)_"

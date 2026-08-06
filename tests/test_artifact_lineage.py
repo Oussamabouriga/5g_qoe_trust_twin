@@ -10,10 +10,10 @@ from unittest.mock import Mock
 import pandas as pd
 import pytest
 
-import scripts.apply_trust_final as final_inference
-import scripts.calibrate_models_final as final_calibration
-import scripts.final_evaluation_final as final_evaluation
-import scripts.train_models_final as final_training
+import scripts.apply_trust as final_inference
+import scripts.calibrate_models as final_calibration
+import scripts.final_evaluation as final_evaluation
+import scripts.train_models as final_training
 from qoe_twin.artifact_lineage import (
     ArtifactKind,
     ArtifactLineage,
@@ -507,7 +507,7 @@ def test_final_inference_routes_to_selected_calibrator_before_data_or_load(
     joblib_load.assert_not_called()
 
 
-def test_final_inference_requires_cp8_abstention_selection_before_artifacts(
+def test_inference_requires_selected_abstention_threshold_before_artifacts(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -540,7 +540,7 @@ def test_final_inference_requires_cp8_abstention_selection_before_artifacts(
     monkeypatch.setattr(final_inference.pd, "read_parquet", parquet_read)
     monkeypatch.setattr(final_inference.joblib, "load", joblib_load)
 
-    with pytest.raises(ValueError, match="CP8 validation-selected"):
+    with pytest.raises(ValueError, match="validation-selected"):
         final_inference.main()
 
     model_validation.assert_not_called()

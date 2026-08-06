@@ -5,9 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
-
 
 DATASET_DIRECTORY = Path("data/external/5G-QoERA/5G-QoERA")
 OUTPUT_DIRECTORY = Path("results/tables")

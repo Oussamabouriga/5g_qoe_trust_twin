@@ -54,11 +54,11 @@
   "schema_version": 1,
   "source_artifacts": {
     "completed_explanations": {
-      "path": "results/explanations/cp9_phase_a_completed.jsonl",
+        "path": "results/explanations/final_explanations.jsonl",
       "sha256": "4e4a531ec23537dbd4f82d64f86ef949ebf5045c7abc2d80dd93bb3cefb0dcf5"
     },
     "completed_manual_review": {
-      "path": "results/explanations/cp9_phase_a_manual_review_completed.csv",
+        "path": "results/explanations/final_manual_review.csv",
       "sha256": "dedbacb86c3dd6c503e3d5aceaf377e6fe6593a1d814f959a23a338245234281"
     }
   },

@@ -1,4 +1,4 @@
-"""Synthetic CP8 calibration and abstention-integration tests."""
+"""Synthetic calibration and abstention-integration tests."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from qoe_twin.trust import (
     calculate_configured_trust,
     select_validation_abstention_threshold,
 )
-from scripts.calibrate_models_final import build_validation_trust_scores
+from scripts.calibrate_models import build_validation_trust_scores
 
 
 def _confidence_only_policy() -> TrustPolicy:

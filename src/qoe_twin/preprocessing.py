@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pandas as pd
 
-
 BITRATE_TO_RESOLUTION = {
     2000: "720p",
     4000: "1080p",

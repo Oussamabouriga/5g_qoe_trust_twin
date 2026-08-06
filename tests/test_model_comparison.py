@@ -1,4 +1,4 @@
-"""Synthetic tests for the sealed CP8 three-model comparison."""
+"""Synthetic tests for the sealed three-model comparison."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import scripts.final_evaluation_final as final_evaluation
+import scripts.final_evaluation as final_evaluation
 from qoe_twin.features import get_network_feature_names
 
 

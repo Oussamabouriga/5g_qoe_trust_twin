@@ -1,4 +1,4 @@
-"""Synthetic tests for the CP8 corrected-dataset training preflight."""
+"""Synthetic tests for the training-dataset preflight."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import pandas as pd
 import pytest
 
-import scripts.train_models_final as final_training
+import scripts.train_models as final_training
 from qoe_twin.artifact_lineage import sha256_file
 from qoe_twin.config import LoadedConfiguration, canonical_sha256
 from qoe_twin.sample_validation import parquet_metadata

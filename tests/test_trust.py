@@ -129,8 +129,8 @@ def test_configured_trust_rejects_nonfinite_inputs(
         calculate_configured_trust(**inputs)  # type: ignore[arg-type]
 
 
-def test_cp8_abstention_threshold_has_no_implicit_fallback() -> None:
-    with pytest.raises(ValueError, match="CP8 validation-selected"):
+def test_selected_abstention_threshold_has_no_implicit_fallback() -> None:
+    with pytest.raises(ValueError, match="validation-selected"):
         require_selected_abstention_threshold({})
 
     assert require_selected_abstention_threshold(
@@ -378,6 +378,10 @@ def test_low_confidence_can_abstain() -> None:
         validation_ece=0.05,
         data_quality=1.0,
         prediction_stability=1.0,
+        confidence_weight=1.0,
+        validation_weight=0.0,
+        data_quality_weight=0.0,
+        stability_weight=0.0,
         abstention_threshold=0.55,
     )
 
@@ -391,6 +395,10 @@ def test_high_confidence_is_trusted() -> None:
         validation_ece=0.03,
         data_quality=1.0,
         prediction_stability=1.0,
+        confidence_weight=1.0,
+        validation_weight=0.0,
+        data_quality_weight=0.0,
+        stability_weight=0.0,
         abstention_threshold=0.55,
     )
 

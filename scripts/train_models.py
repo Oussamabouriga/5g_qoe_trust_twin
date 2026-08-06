@@ -1,74 +1,195 @@
-"""Train baseline, network-only and cross-layer QoE models."""
+"""Fit the configured models using training rows only."""
 
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from pathlib import Path
 
 import joblib
-import numpy as np
 import pandas as pd
 
-from qoe_twin.baselines import (
-    CurrentQoEPersistenceBaseline,
+from qoe_twin.artifact_lineage import (
+    load_resolved_configuration,
+    require_feature_columns,
+    sha256_file,
+    write_model_lineage,
 )
+from qoe_twin.baselines import CurrentQoEPersistenceBaseline
+from qoe_twin.config import LoadedConfiguration, canonical_sha256
 from qoe_twin.features import (
     get_cross_layer_feature_names,
     get_network_feature_names,
-)
-from qoe_twin.metrics import (
-    classification_metrics,
-    find_best_f1_threshold,
 )
 from qoe_twin.models import (
     build_cross_layer_random_forest,
     build_network_logistic_regression,
 )
-
+from qoe_twin.sample_validation import parquet_metadata
 
 DATA_PATH = Path(
-    "data/processed/qoe_features_prototype.parquet"
+    "data/processed/qoe_features_final.parquet"
 )
 
 MODEL_DIRECTORY = Path("models/uncalibrated")
 RESULT_DIRECTORY = Path("results/metrics")
-TABLE_DIRECTORY = Path("results/tables")
-PREDICTION_DIRECTORY = Path("results/predictions")
+CONFIG_DIRECTORY = Path("configs")
 
-TARGET_COLUMN = "future_poor_qoe"
-RANDOM_SEED = 42
+
+class TrainingDatasetManifestError(ValueError):
+    """Raised when the training dataset cannot be authenticated."""
+
+
+def _repository_path(repository_root: Path, path: str | Path) -> Path:
+    candidate = Path(path)
+    if candidate.is_absolute():
+        return candidate.resolve()
+    return (repository_root / candidate).resolve()
+
+
+def validate_training_dataset_manifest(
+    configuration: LoadedConfiguration,
+    *,
+    data_path: Path = DATA_PATH,
+    repository_root: Path = Path("."),
+) -> dict[str, str | int]:
+    """Authenticate the configured dataset without loading its rows."""
+    sample_configuration = configuration.values["data"]["sample"]
+    configured_data_path = str(sample_configuration["corrected_feature_file"])
+    expected_data_path = _repository_path(repository_root, data_path)
+    if _repository_path(repository_root, configured_data_path) != expected_data_path:
+        raise TrainingDatasetManifestError(
+            "Configured feature path does not match the training "
+            f"training DATA_PATH: {configured_data_path!r} != {str(data_path)!r}."
+        )
+
+    manifest_relative_path = str(sample_configuration["split_manifest_file"])
+    manifest_path = _repository_path(repository_root, manifest_relative_path)
+    if not manifest_path.is_file():
+        raise TrainingDatasetManifestError(
+            f"Configured split manifest is missing: {manifest_path}."
+        )
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise TrainingDatasetManifestError(
+            f"Configured split manifest is not readable JSON: {manifest_path}."
+        ) from exc
+    if not isinstance(manifest, Mapping):
+        raise TrainingDatasetManifestError(
+            "Configured split manifest must contain a JSON object."
+        )
+    if manifest.get("artifact_kind") != "corrected_causal_feature_dataset":
+        raise TrainingDatasetManifestError(
+            "Split manifest artifact_kind must be "
+            "'corrected_causal_feature_dataset'."
+        )
+    if manifest.get("configuration_sha256") != configuration.sha256:
+        raise TrainingDatasetManifestError(
+            "Split manifest configuration SHA-256 does not match the "
+            "current resolved configuration."
+        )
+
+    output = manifest.get("output")
+    if not isinstance(output, Mapping):
+        raise TrainingDatasetManifestError(
+            "Split manifest output must be a JSON object."
+        )
+    manifest_output_path = output.get("path")
+    if not isinstance(manifest_output_path, str) or not manifest_output_path:
+        raise TrainingDatasetManifestError(
+            "Split manifest output.path must be a nonempty string."
+        )
+    if (
+        _repository_path(repository_root, manifest_output_path)
+        != expected_data_path
+    ):
+        raise TrainingDatasetManifestError(
+            "Split manifest output.path does not match the configured "
+            f"training DATA_PATH: {manifest_output_path!r} != {str(data_path)!r}."
+        )
+
+    dataset_sha256 = sha256_file(expected_data_path)
+    if output.get("sha256") != dataset_sha256:
+        raise TrainingDatasetManifestError(
+            "Split manifest dataset SHA-256 does not match the exact "
+            "Parquet bytes."
+        )
+    footer = parquet_metadata(expected_data_path)
+    for field in ("rows", "columns"):
+        recorded = output.get(field)
+        if type(recorded) is not int or recorded != footer[field]:
+            raise TrainingDatasetManifestError(
+                f"Split manifest output.{field} does not match the "
+                "Parquet footer."
+            )
+    schema_sha256 = canonical_sha256(footer["schema"])
+    if output.get("schema_sha256") != schema_sha256:
+        raise TrainingDatasetManifestError(
+            "Split manifest schema SHA-256 does not match the Parquet footer."
+        )
+
+    return {
+        "columns": footer["columns"],
+        "dataset_path": str(data_path),
+        "dataset_sha256": dataset_sha256,
+        "manifest_path": manifest_relative_path,
+        "manifest_sha256": sha256_file(manifest_path),
+        "rows": footer["rows"],
+        "schema_sha256": schema_sha256,
+    }
+
+
+def final_random_forest_artifact_path(
+    model_directory: Path = MODEL_DIRECTORY,
+) -> Path:
+    """Return the artifact path produced by final RF training."""
+    return (
+        model_directory
+        / "cross_layer_random_forest_final.joblib"
+    )
+
+
+def save_final_random_forest(
+    model: object,
+    model_directory: Path = MODEL_DIRECTORY,
+) -> Path:
+    """Persist the final RF to its contracted artifact path."""
+    artifact_path = final_random_forest_artifact_path(
+        model_directory
+    )
+    joblib.dump(model, artifact_path)
+    return artifact_path
 
 
 def clean_feature_lists(
     frame: pd.DataFrame,
 ) -> tuple[list[str], list[str], list[str]]:
-    """Return usable feature lists present in the dataset."""
-    network_features = [
-        feature
-        for feature in get_network_feature_names()
-        if feature in frame.columns
-    ]
-
-    cross_layer_features = [
-        feature
-        for feature in get_cross_layer_feature_names()
-        if feature in frame.columns
-    ]
+    """Return the complete required feature lists or fail clearly."""
+    network_features = list(get_network_feature_names())
+    cross_layer_features = list(get_cross_layer_feature_names())
 
     categorical_features = [
         feature
-        for feature in [
-            "resolution",
-        ]
+        for feature in ["resolution"]
         if feature in cross_layer_features
     ]
-
     cross_numeric_features = [
         feature
         for feature in cross_layer_features
         if feature not in categorical_features
     ]
 
+    require_feature_columns(
+        frame.columns,
+        network_features,
+        context="final network model",
+    )
+    require_feature_columns(
+        frame.columns,
+        [*cross_numeric_features, *categorical_features],
+        context="final Random Forest",
+    )
     return (
         network_features,
         cross_numeric_features,
@@ -79,343 +200,209 @@ def clean_feature_lists(
 def prepare_split(
     frame: pd.DataFrame,
     split_name: str,
+    *,
+    target_column: str = "future_poor_qoe",
 ) -> pd.DataFrame:
-    """Return one valid split."""
-    split = frame[
-        frame["split"] == split_name
-    ].copy()
-
-    split = split[
-        split[TARGET_COLUMN].notna()
-    ].copy()
-
-    split[TARGET_COLUMN] = split[
-        TARGET_COLUMN
-    ].astype(int)
-
+    """Return valid rows from one named split."""
+    split = frame[frame["split"].eq(split_name)].copy()
+    split = split[split[target_column].notna()].copy()
+    split[target_column] = split[target_column].astype(int)
     return split
 
 
-def save_predictions(
-    frame: pd.DataFrame,
-    model_name: str,
-    probability: np.ndarray,
-    threshold: float,
-) -> None:
-    """Save validation predictions for later analysis."""
-    output = frame[
-        [
-            "session_id",
-            "user_id",
-            "timestamp",
-            "future_timestamp",
-            "prediction_lead_seconds",
-            TARGET_COLUMN,
-        ]
-    ].copy()
-
-    output["model"] = model_name
-    output["probability_poor_qoe"] = probability
-    output["decision_threshold"] = threshold
-    output["predicted_poor_qoe"] = (
-        probability >= threshold
-    ).astype(int)
-
-    path = (
-        PREDICTION_DIRECTORY
-        / f"{model_name}_validation_predictions.parquet"
+def build_configured_models(
+    configuration: LoadedConfiguration,
+    *,
+    network_features: list[str],
+    cross_numeric_features: list[str],
+    categorical_features: list[str],
+) -> tuple[CurrentQoEPersistenceBaseline, object, object]:
+    """Construct the frozen models exclusively from validated YAML values."""
+    data_target = configuration.values["data"]["target"]
+    model_configuration = configuration.values["model"]
+    models = model_configuration["models"]
+    required_models = (
+        "persistence",
+        "logistic_regression",
+        "random_forest",
     )
+    disabled = [
+        name
+        for name in required_models
+        if not models[name]["enabled"]
+    ]
+    if disabled:
+        raise ValueError(
+            "The frozen final experiment requires enabled models: "
+            + ", ".join(disabled)
+        )
 
-    output.to_parquet(
-        path,
-        index=False,
+    random_seed = int(
+        model_configuration["experiment"]["random_seed"]
     )
+    logistic_configuration = models["logistic_regression"]
+    forest_configuration = models["random_forest"]
+    max_depth_value = forest_configuration["max_depth"]
+    max_samples_value = forest_configuration["max_samples"]
+
+    persistence = CurrentQoEPersistenceBaseline(
+        poor_mos_threshold=float(
+            data_target["poor_mos_threshold"]
+        )
+    )
+    logistic = build_network_logistic_regression(
+        numeric_features=network_features,
+        random_seed=random_seed,
+        max_iter=int(logistic_configuration["max_iter"]),
+        class_weight=str(logistic_configuration["class_weight"]),
+    )
+    random_forest = build_cross_layer_random_forest(
+        numeric_features=cross_numeric_features,
+        categorical_features=categorical_features,
+        random_seed=random_seed,
+        n_estimators=int(forest_configuration["n_estimators"]),
+        max_depth=(
+            None
+            if max_depth_value is None
+            else int(max_depth_value)
+        ),
+        min_samples_leaf=int(
+            forest_configuration["min_samples_leaf"]
+        ),
+        class_weight=str(forest_configuration["class_weight"]),
+        n_jobs=int(forest_configuration["n_jobs"]),
+        max_samples=(
+            None
+            if max_samples_value is None
+            else float(max_samples_value)
+        ),
+    )
+    return persistence, logistic, random_forest
 
 
 def main() -> None:
-    """Train and evaluate all required prototype models."""
-    print(f"Reading {DATA_PATH}")
-    frame = pd.read_parquet(DATA_PATH)
+    """Fit and save models without inspecting validation or test rows."""
+    configuration = load_resolved_configuration(
+        CONFIG_DIRECTORY
+    )
+    dataset_identity = validate_training_dataset_manifest(
+        configuration,
+        data_path=DATA_PATH,
+        repository_root=Path("."),
+    )
+    target_column = str(
+        configuration.values["model"]["target"]["name"]
+    )
 
-    train = prepare_split(frame, "train")
-    validation = prepare_split(frame, "validation")
-
+    print(f"Reading training partition: {DATA_PATH}")
+    frame = pd.read_parquet(
+        DATA_PATH,
+        filters=[("split", "==", "train")],
+    )
+    train = prepare_split(
+        frame,
+        "train",
+        target_column=target_column,
+    )
     (
         network_features,
         cross_numeric_features,
         categorical_features,
-    ) = clean_feature_lists(frame)
-
+    ) = clean_feature_lists(train)
     cross_features = [
         *cross_numeric_features,
         *categorical_features,
     ]
 
-    print("\nDATA")
+    print("\nTRAINING DATA")
     print("=" * 70)
-    print(f"Training rows: {len(train):,}")
-    print(f"Validation rows: {len(validation):,}")
+    print(f"Rows: {len(train):,}")
     print(
-        "Training poor-QoE rate:",
-        f"{train[TARGET_COLUMN].mean():.2%}",
-    )
-    print(
-        "Validation poor-QoE rate:",
-        f"{validation[TARGET_COLUMN].mean():.2%}",
+        "Poor-QoE rate:",
+        f"{train[target_column].mean():.2%}",
     )
     print(f"Network features: {len(network_features)}")
     print(f"Cross-layer features: {len(cross_features)}")
 
-    MODEL_DIRECTORY.mkdir(
-        parents=True,
-        exist_ok=True,
+    MODEL_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    RESULT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+    persistence, logistic, random_forest = build_configured_models(
+        configuration,
+        network_features=network_features,
+        cross_numeric_features=cross_numeric_features,
+        categorical_features=categorical_features,
     )
-    RESULT_DIRECTORY.mkdir(
-        parents=True,
-        exist_ok=True,
+    target = train[target_column].to_numpy()
+
+    print("\nFitting network-only Logistic Regression...")
+    logistic.fit(train[network_features], target)
+
+    print("Fitting cross-layer Random Forest...")
+    random_forest.fit(train[cross_features], target)
+
+    persistence_path = MODEL_DIRECTORY / "persistence_final.joblib"
+    logistic_path = MODEL_DIRECTORY / "network_logistic_final.joblib"
+    joblib.dump(persistence, persistence_path)
+    joblib.dump(logistic, logistic_path)
+    random_forest_path = save_final_random_forest(
+        random_forest,
+        MODEL_DIRECTORY,
     )
-    TABLE_DIRECTORY.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-    PREDICTION_DIRECTORY.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    y_train = train[TARGET_COLUMN].to_numpy()
-    y_validation = validation[TARGET_COLUMN].to_numpy()
-
-    results: list[dict] = []
-    thresholds: dict[str, float] = {}
-
-    # --------------------------------------------------
-    # Persistence baseline
-    # --------------------------------------------------
-
-    print("\nTraining/evaluating persistence baseline...")
-
-    persistence = CurrentQoEPersistenceBaseline(
-        poor_mos_threshold=3.0
-    )
-
-    persistence_probability = persistence.predict_proba(
-        validation[["current_mos"]]
-    )[:, 1]
-
-    persistence_metrics = classification_metrics(
-        y_validation,
-        persistence_probability,
-        threshold=0.5,
-    )
-
-    persistence_metrics["model"] = "persistence"
-    results.append(persistence_metrics)
-    thresholds["persistence"] = 0.5
-
-    save_predictions(
-        validation,
-        "persistence",
-        persistence_probability,
-        0.5,
-    )
-
-    # --------------------------------------------------
-    # Network Logistic Regression
-    # --------------------------------------------------
-
-    print("Training network-only Logistic Regression...")
-
-    logistic = build_network_logistic_regression(
-        numeric_features=network_features,
-        random_seed=RANDOM_SEED,
-    )
-
-    logistic.fit(
-        train[network_features],
-        y_train,
-    )
-
-    logistic_probability = logistic.predict_proba(
-        validation[network_features]
-    )[:, 1]
-
-    logistic_threshold, logistic_curve = (
-        find_best_f1_threshold(
-            y_validation,
-            logistic_probability,
-        )
-    )
-
-    logistic_metrics = classification_metrics(
-        y_validation,
-        logistic_probability,
-        threshold=logistic_threshold,
-    )
-
-    logistic_metrics["model"] = "network_logistic"
-    results.append(logistic_metrics)
-    thresholds["network_logistic"] = logistic_threshold
-
-    joblib.dump(
-        logistic,
-        MODEL_DIRECTORY
-        / "network_logistic_prototype.joblib",
-    )
-
-    pd.DataFrame(logistic_curve).to_csv(
-        TABLE_DIRECTORY
-        / "network_logistic_threshold_curve.csv",
-        index=False,
-    )
-
-    save_predictions(
-        validation,
-        "network_logistic",
-        logistic_probability,
-        logistic_threshold,
-    )
-
-    # --------------------------------------------------
-    # Cross-layer Random Forest
-    # --------------------------------------------------
-
-    print("Training cross-layer Random Forest...")
-
-    random_forest = build_cross_layer_random_forest(
+    write_model_lineage(
+        random_forest_path,
+        configuration=configuration,
         numeric_features=cross_numeric_features,
         categorical_features=categorical_features,
-        random_seed=RANDOM_SEED,
-        n_estimators=250,
-        max_depth=18,
-        min_samples_leaf=5,
     )
 
-    random_forest.fit(
-        train[cross_features],
-        y_train,
-    )
-
-    forest_probability = random_forest.predict_proba(
-        validation[cross_features]
-    )[:, 1]
-
-    forest_threshold, forest_curve = (
-        find_best_f1_threshold(
-            y_validation,
-            forest_probability,
-        )
-    )
-
-    forest_metrics = classification_metrics(
-        y_validation,
-        forest_probability,
-        threshold=forest_threshold,
-    )
-
-    forest_metrics["model"] = "cross_layer_random_forest"
-    results.append(forest_metrics)
-    thresholds[
-        "cross_layer_random_forest"
-    ] = forest_threshold
-
-    joblib.dump(
-        random_forest,
-        MODEL_DIRECTORY
-        / "cross_layer_random_forest_prototype.joblib",
-    )
-
-    pd.DataFrame(forest_curve).to_csv(
-        TABLE_DIRECTORY
-        / "cross_layer_random_forest_threshold_curve.csv",
-        index=False,
-    )
-
-    save_predictions(
-        validation,
-        "cross_layer_random_forest",
-        forest_probability,
-        forest_threshold,
-    )
-
-    # --------------------------------------------------
-    # Save comparison
-    # --------------------------------------------------
-
-    comparison = pd.DataFrame(results)
-
-    column_order = [
-        "model",
-        "threshold",
-        "f1",
-        "precision",
-        "recall",
-        "pr_auc",
-        "brier_score",
-        "false_alarm_rate",
-        "true_negatives",
-        "false_positives",
-        "false_negatives",
-        "true_positives",
-    ]
-
-    comparison = comparison[column_order].sort_values(
-        ["f1", "pr_auc"],
-        ascending=False,
-    )
-
-    comparison_path = (
-        TABLE_DIRECTORY
-        / "prototype_model_comparison.csv"
-    )
-
-    comparison.to_csv(
-        comparison_path,
-        index=False,
-    )
-
+    model_configuration = configuration.values["model"]
     metadata = {
+        "configuration_sha256": configuration.sha256,
         "data_path": str(DATA_PATH),
+        "dataset_identity": dataset_identity,
+        "training_split": "train",
         "training_rows": len(train),
-        "validation_rows": len(validation),
+        "target": {
+            "description": "next-observation poor-QoE forecasting",
+            "column": target_column,
+            "horizon_steps": configuration.values["data"]["target"][
+                "horizon_steps"
+            ],
+            "poor_mos_rule": "future_mos < poor_mos_threshold",
+            "poor_mos_threshold": configuration.values["data"]["target"][
+                "poor_mos_threshold"
+            ],
+        },
+        "random_seed": model_configuration["experiment"]["random_seed"],
+        "model_configuration": {
+            "logistic_regression": dict(
+                model_configuration["models"]["logistic_regression"]
+            ),
+            "random_forest": dict(
+                model_configuration["models"]["random_forest"]
+            ),
+        },
         "network_features": network_features,
         "cross_numeric_features": cross_numeric_features,
         "categorical_features": categorical_features,
-        "selected_thresholds": thresholds,
+        "artifacts": {
+            "persistence": str(persistence_path),
+            "network_logistic": str(logistic_path),
+            "cross_layer_random_forest": str(random_forest_path),
+        },
     }
-
-    metadata_path = (
-        RESULT_DIRECTORY
-        / "prototype_training_metadata.json"
-    )
-
+    metadata_path = RESULT_DIRECTORY / "final_training_metadata.json"
     metadata_path.write_text(
-        json.dumps(
-            metadata,
-            indent=2,
-        ),
+        json.dumps(metadata, indent=2),
         encoding="utf-8",
     )
 
-    print("\nMODEL COMPARISON — VALIDATION SET")
-    print("=" * 120)
-
-    with pd.option_context(
-        "display.max_columns",
-        None,
-        "display.width",
-        180,
-    ):
-        print(
-            comparison.to_string(
-                index=False,
-            )
-        )
-
     print("\nSaved:")
-    print(f"- {comparison_path}")
+    print(f"- {persistence_path}")
+    print(f"- {logistic_path}")
+    print(f"- {random_forest_path}")
     print(f"- {metadata_path}")
-    print(f"- {MODEL_DIRECTORY}")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""Synthetic contracts for the bounded CP6 sample-validation path."""
+"""Synthetic contracts for the bounded sample-validation path."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 
 import qoe_twin.sample_validation as sample_validation
-import scripts.build_features_final as final_feature_build
+import scripts.build_features as final_feature_build
 from qoe_twin.artifact_lineage import sha256_file
 from qoe_twin.config import canonical_sha256, load_config_directory
 from qoe_twin.sample_validation import (
@@ -34,7 +34,7 @@ RAW_RELATIVE_PATH = (
 
 
 class _StopAfterArtifactValidation(Exception):
-    """Stop the CP6 entry point at its mandatory first artifact check."""
+    """Stop the build entry point at its mandatory first artifact check."""
 
 
 def _base_rows() -> pd.DataFrame:

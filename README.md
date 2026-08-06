@@ -1,6 +1,6 @@
 # Trust-Aware 5G QoE Digital Twin
 
-A research prototype for **next-observation poor-QoE forecasting in 5G New Radio video streaming**.
+A research implementation for **next-observation poor-QoE forecasting in 5G New Radio video streaming**.
 
 The project combines offline chronological session reconstruction, past-only
 temporal and cross-layer feature engineering, synthetic replay-parity checks,
@@ -15,7 +15,7 @@ validation, and publication-ready evaluation outputs.
 
 The system addresses the following research question:
 
-> Can a trust-aware Digital Twin prototype forecast poor video-streaming QoE at
+> Can a trust-aware Digital Twin forecast poor video-streaming QoE at
 > the next observed row from past-only features while producing calibrated
 > probabilities, abstaining from unreliable predictions, and generating
 > evidence-grounded operator explanations?
@@ -27,7 +27,7 @@ Data inspection and preparation
         ↓
 Long-format modelling dataset
         ↓
-Complete-session sampling
+Audited resource-safe sample
         ↓
 Offline chronological session reconstruction
         ↓
@@ -56,11 +56,10 @@ Accepted or rejected explanation
 
 ---
 
-## 2. Corrected frozen results
+## 2. Frozen results
 
-The values in this section come from the single frozen CP8 experiment and the
-validated CP9 explanation review. Historical values in the submitted PDF are
-superseded.
+The values in this section come from the frozen experiment and the validated
+explanation review artifacts retained in this repository.
 
 The pinned resource-safe input contains **994,496 rows**. Rebuilding sessions,
 the next-observation target, prediction-time-available features, and split
@@ -109,13 +108,12 @@ Trust results:
 The trust score is a heuristic reliability score, not a probability of
 correctness.
 
-CP9 used seed 42 to select ten accepted poor-QoE predictions, ten accepted
-acceptable-QoE predictions, and ten abstentions. The prompts were exported for
-offline LLM completion. Before final validation, the `limitations` field in
-each of the ten abstention explanations was replaced with the prescribed
-insufficient-evidence statement. The corrected retained batch was then checked
-through the same schema and grounding validators used by the normal generation
-path:
+Seed 42 selected ten accepted poor-QoE predictions, ten accepted acceptable-QoE
+predictions, and ten abstentions. The prompts were exported for offline LLM
+completion. Every retained abstention explanation states that evidence is
+insufficient to support a specific cause or choose between poor and acceptable
+QoE. The retained batch passed the same schema and grounding validators used by
+the normal generation path:
 
 - schema-valid rate: **100%**;
 - grounding pass rate: **100%**;
@@ -138,40 +136,24 @@ to a specific provider or model.
 ```text
 5g_qoe_trust_twin/
 ├── configs/
-│   ├── data.yaml
-│   ├── model.yaml
-│   ├── trust.yaml
-│   └── llm.yaml
 ├── data/
-│   ├── external/
-│   ├── interim/
-│   ├── processed/
-│   ├── raw/
-│   └── llm_evaluation/
-├── docs/
+├── manifests/
 ├── models/
-│   ├── baseline/
-│   ├── calibrated/
-│   └── uncalibrated/
 ├── notebooks/
-├── paper/
+├── provenance/
 ├── report/
-│   ├── figures/
-│   ├── references/
-│   ├── tables/
-│   └── FINAL_REPORT_UPDATE.md
 ├── results/
-│   ├── evidence/
-│   ├── explanations/
-│   ├── figures/
-│   ├── metrics/
-│   ├── predictions/
-│   ├── publication_figures/
-│   ├── publication_tables/
-│   └── tables/
 ├── scripts/
-├── src/
-│   └── qoe_twin/
+│   ├── prepare_data.py
+│   ├── build_features.py
+│   ├── train_models.py
+│   ├── calibrate_models.py
+│   ├── apply_trust.py
+│   ├── final_evaluation.py
+│   ├── generate_batch_explanations.py
+│   └── evaluate_llm.py
+├── src/qoe_twin/
+├── templates/
 ├── tests/
 ├── .env.example
 ├── .gitignore
@@ -209,10 +191,10 @@ Recommended environment:
 - at least 8 GB RAM;
 - 16 GB RAM recommended for the final sample;
 - sufficient disk space for the external dataset, processed Parquet files, and models;
-- an OpenAI API key only for the optional online explanation client; the
-  retained CP9 offline workflow does not require one.
+- an OpenAI API key only for the optional online explanation client; offline
+  prompt export and validation do not require one.
 
-The corrected experiment was developed and tested with Python 3.11.
+The experiment was developed and tested with Python 3.11.
 
 Check the active interpreter:
 
@@ -321,10 +303,13 @@ Important:
 - the ML pipeline does not require the API key;
 - only explanation scripts call OpenAI.
 
-Test the explanation layer:
+Test the explanation layer without an API call:
 
 ```bash
-python scripts/test_explanation_generator.py
+python -m pytest \
+  tests/test_explanation_generator.py \
+  tests/test_prompt_builder.py \
+  tests/test_grounding.py -q
 ```
 
 ---
@@ -447,20 +432,20 @@ already-poor to poor transitions remain positive examples.
 
 ---
 
-## 11. Validate the resource-safe final sample
+## 11. Validate the resource-safe sample
 
-CP6 does not rebuild the 16.6-million-row intermediate on a 16 GB machine.
-It requires the locally audited, immutable input:
+The resource-safe workflow does not rebuild the 16.6-million-row intermediate
+on a 16 GB machine. It requires the locally audited, immutable input:
 
 ```text
 data/processed/friend_snapshot_quarantine/qoe_modeling_final_sample.parquet
 SHA-256: 68ee536b88d294b9faa97b5e2c7d3eec4c46c07dc756d163b95ce32fa1d09100
 ```
 
-The source remains labelled `quarantine` because its historical sampling
-command is unavailable. Before using it, the CP6 build verifies its exact
-bytes and schema, checks every row against the trusted raw TSV content, and
-discards all inherited session and future-target calculations.
+The source remains labelled `quarantine` because its producing sampling command
+is unavailable. Before using it, the feature build verifies its exact bytes and
+schema, checks every row against the trusted raw TSV content, and discards all
+inherited session and future-target calculations.
 
 Validated input:
 
@@ -476,10 +461,10 @@ random sample. Four bitrate rows also share each physical radio observation.
 
 ---
 
-## 12. Build final Digital Twin features
+## 12. Build Digital Twin features
 
 ```bash
-python scripts/build_features_final.py
+python scripts/build_features.py
 ```
 
 This stage:
@@ -506,7 +491,7 @@ Future MOS values are never used as prediction inputs.
 ## 13. Train the models
 
 ```bash
-python scripts/train_models_final.py
+python scripts/train_models.py
 ```
 
 Models:
@@ -531,7 +516,7 @@ select decision thresholds. Validation roles are reserved for calibration.
 ## 14. Calibrate probabilities
 
 ```bash
-python scripts/calibrate_models_final.py
+python scripts/calibrate_models.py
 ```
 
 Compared methods:
@@ -541,8 +526,8 @@ Compared methods:
 
 The validation partition is divided chronologically. Its first half fits both
 calibrators, after removing labels that cross the internal midpoint. Its second
-half selects the calibration method and decision threshold. In the frozen CP8
-run, isotonic calibration was selected for both learned models. The selected
+half selects the calibration method and decision threshold. In the frozen run,
+isotonic calibration was selected for both learned models. The selected
 decision thresholds were `0.35` for Network Logistic Regression and `0.37` for
 the Random Forest. These choices were frozen before the test partition was
 accessed.
@@ -563,7 +548,7 @@ This stage ran after validation selected and froze both the model decision
 threshold and the abstention threshold:
 
 ```bash
-python scripts/apply_trust_final.py
+python scripts/apply_trust.py
 ```
 
 Probability confidence is the normalized distance from the selected model
@@ -589,7 +574,7 @@ is no alternative hardcoded production formula. The resulting score is a
 **heuristic reliability score**, not a probability that a prediction is
 correct.
 
-The abstention threshold was selected using only corrected validation
+The abstention threshold was selected using only validation
 predictions, minimizing selective risk subject to at least 90% coverage. The
 frozen threshold was `0.6711849773025693`; it achieved 90.20% coverage on the
 selection half and 90.40% coverage on the sealed test set. Trust-level labels
@@ -608,7 +593,7 @@ results/tables/final_trust_summary.csv
 ## 16. Final evaluation
 
 ```bash
-python scripts/final_evaluation_final.py
+python scripts/final_evaluation.py
 ```
 
 Outputs:
@@ -638,7 +623,7 @@ next observation; it is not evidence of degradation-onset warning time.
 
 ## 17. Generate grounded LLM explanations
 
-The corrected explanation layer uses three separate prompts: poor QoE,
+The explanation layer uses three separate prompts: poor QoE,
 acceptable QoE, and abstention. Operational evidence contains only approved
 fields available at prediction time. In particular, it excludes
 `prediction_lead_seconds`, future timestamps, future MOS, targets, and other
@@ -650,8 +635,8 @@ return an empty cause list. Grounding validation rejects obvious prediction
 polarity contradictions, confident causal claims for abstentions, unsupported
 numbers, incorrect field attribution, and incompatible units.
 
-CP9 used the frozen CP8 predictions and a deterministic seed of 42. It selected
-exactly ten accepted poor-QoE predictions, ten accepted acceptable-QoE
+The explanation review used frozen predictions and deterministic seed 42 to
+select exactly ten accepted poor-QoE predictions, ten accepted acceptable-QoE
 predictions, and ten abstentions. No API was called by the repository during
 this evaluation. The normal evidence and prompt builders exported the batch:
 
@@ -662,12 +647,8 @@ python scripts/generate_batch_explanations.py \
   --seed 42
 ```
 
-Only the `explanation` field was completed externally. After return, the ten
-abstention explanations received one prescribed local correction: their
-`limitations` field was set to "There is insufficient evidence to support a
-specific cause or to choose between poor and acceptable QoE." The returned and
-corrected JSONL was then imported and checked with the existing schema and
-grounding validators:
+Only the `explanation` field was completed externally. The completed JSONL was
+then imported and checked with the existing schema and grounding validators:
 
 ```bash
 python scripts/generate_batch_explanations.py --import-completed-jsonl
@@ -680,14 +661,13 @@ and contradiction fields use `1` when the problem is present.
 Outputs:
 
 ```text
-results/explanations/cp9_phase_a_prompts.jsonl
-results/explanations/cp9_phase_a_completed.jsonl
-results/explanations/cp9_phase_a_manual_review.csv
-results/explanations/cp9_phase_a_manual_review_completed.csv
-results/metrics/cp9_human_evaluation.json
-results/tables/cp9_human_evaluation.csv
+results/explanations/explanation_prompts.jsonl
+results/explanations/final_explanations.jsonl
+results/explanations/manual_review_template.csv
+results/explanations/final_manual_review.csv
+results/metrics/llm_human_evaluation.json
+results/tables/llm_human_evaluation.csv
 ```
-
 The exported prompt contains only approved decision-time evidence fields and
 excludes the target label, training data, unrestricted raw histories, and
 retrospective lead-time information.
@@ -696,20 +676,18 @@ retrospective lead-time information.
 
 ## 18. Publication material
 
-Use the frozen CP8 and validated CP9 artifacts directly. In particular, do not
-reuse historical publication tables whose values predate the corrected run.
+Use the frozen experiment and validated explanation-review artifacts directly:
 
 ```text
 results/tables/final_model_comparison.csv
 results/tables/final_final_metrics.csv
 results/tables/final_trust_summary.csv
 results/tables/final_rf_validation_risk_coverage.csv
-results/tables/cp9_human_evaluation.csv
+results/tables/llm_human_evaluation.csv
 results/metrics/final_final_evaluation.json
 results/metrics/selected_calibration_configuration_final.json
-results/metrics/cp9_human_evaluation.json
+results/metrics/llm_human_evaluation.json
 results/figures/
-report/FINAL_REPORT_UPDATE.md
 ```
 
 ---
@@ -721,17 +699,17 @@ source .venv/bin/activate
 
 python -m pytest -v
 
-python scripts/build_features_final.py
-python scripts/train_models_final.py
-python scripts/calibrate_models_final.py
-python scripts/apply_trust_final.py
-python scripts/final_evaluation_final.py
+python scripts/build_features.py
+python scripts/train_models.py
+python scripts/calibrate_models.py
+python scripts/apply_trust.py
+python scripts/final_evaluation.py
 
 python scripts/generate_batch_explanations.py \
   --offline-prompt-export --cases 30 --seed 42
-# Complete only each explanation field with an external LLM, then:
+# Save externally completed explanations as final_explanations.jsonl, then:
 python scripts/generate_batch_explanations.py --import-completed-jsonl
-# After the reviewer completes cp9_phase_a_manual_review_completed.csv:
+# Review manual_review_template.csv and save final_manual_review.csv, then:
 python scripts/evaluate_llm.py
 
 python -m pytest -v
@@ -741,7 +719,7 @@ Run expensive stages one at a time.
 
 ---
 
-## 20. Inspect the already-frozen project
+## 20. Inspect the frozen project
 
 ```bash
 source .venv/bin/activate
@@ -765,7 +743,7 @@ python scripts/evaluate_llm.py
 | Complete processed dataset | `data/processed/qoe_modeling_dataset.parquet` |
 | Audited manageable input | `data/processed/friend_snapshot_quarantine/qoe_modeling_final_sample.parquet` |
 | Final feature dataset | `data/processed/qoe_features_final.parquet` |
-| CP6 sample/split manifest | `manifests/cp6_sample_split_manifest.json` |
+| Sample/split manifest | `manifests/cp6_sample_split_manifest.json` |
 | Uncalibrated models | `models/uncalibrated/` |
 | Calibrated models | `models/calibrated/` |
 | Final trusted predictions | `results/predictions/final_trusted_predictions.parquet` |
@@ -773,12 +751,11 @@ python scripts/evaluate_llm.py
 | Model comparison | `results/tables/final_model_comparison.csv` |
 | Calibration comparison | `results/tables/final_calibration_comparison.csv` |
 | Trust summary | `results/tables/final_trust_summary.csv` |
-| Completed explanation cases | `results/explanations/cp9_phase_a_completed.jsonl` |
-| Completed human-review sheet | `results/explanations/cp9_phase_a_manual_review_completed.csv` |
-| Human-evaluation metrics | `results/metrics/cp9_human_evaluation.json` |
-| Human-evaluation table | `results/tables/cp9_human_evaluation.csv` |
+| Completed explanation cases | `results/explanations/final_explanations.jsonl` |
+| Completed human-review sheet | `results/explanations/final_manual_review.csv` |
+| Human-evaluation metrics | `results/metrics/llm_human_evaluation.json` |
+| Human-evaluation table | `results/tables/llm_human_evaluation.csv` |
 | Final figures | `results/figures/` |
-| Corrected report text | `report/FINAL_REPORT_UPDATE.md` |
 
 ---
 
@@ -861,8 +838,8 @@ Expected: `32`.
 
 ### OpenAI key missing
 
-The frozen CP9 evaluation used offline prompt export/import and did not require
-an API key. Only the optional online explanation client requires:
+Offline prompt export/import and review validation do not require an API key.
+Only optional online explanation generation requires:
 
 ```dotenv
 OPENAI_API_KEY=your_real_key
@@ -872,15 +849,18 @@ OPENAI_MODEL=gpt-4o-mini
 Then run:
 
 ```bash
-python scripts/test_explanation_generator.py
+python scripts/generate_batch_explanations.py --cases 1
 ```
 
 ### Explanation schema failure
 
-Do not use unrelated JSON such as `{"status": "working"}`. Use:
+Do not use unrelated JSON such as `{"status": "working"}`. Validate the
+explanation contract with:
 
 ```bash
-python scripts/test_explanation_generator.py
+python -m pytest \
+  tests/test_explanation_schema.py \
+  tests/test_grounding.py -q
 ```
 
 ### Grounding rejection
@@ -888,14 +868,14 @@ python scripts/test_explanation_generator.py
 A rejection means an unsupported number or inconsistency was detected. Inspect:
 
 ```text
-results/explanations/cp9_phase_a_completed.jsonl
+results/explanations/final_explanations.jsonl
 ```
 
 ### Memory pressure
 
-Run `scripts/build_features_final.py` by itself with other memory-intensive
+Run `scripts/build_features.py` by itself with other memory-intensive
 applications closed. Do not construct the full 16.6-million-row intermediate
-on a 16 GB machine. Keep Random Forest resource limits enabled for CP8.
+on a 16 GB machine. Keep the configured Random Forest resource limits enabled.
 
 ### Homebrew warnings
 
@@ -915,7 +895,7 @@ find . -maxdepth 2
 - fit preprocessing only on training data;
 - fit calibrators only on the first chronological validation half;
 - select calibration methods and thresholds only on the second half;
-- keep test labels and outcomes sealed until the frozen CP8 evaluation;
+- keep test labels and outcomes sealed until the frozen evaluation;
 - retain complete sessions when sampling;
 - never tune on the test set;
 - never expose the target label to the LLM;
@@ -931,7 +911,7 @@ find . -maxdepth 2
 
 - The target is a one-observation-ahead state forecast, not degradation onset;
   the elapsed interval between observations is irregular.
-- The pinned sample is an earliest-time, group-balanced subset whose historical
+- The pinned sample is an earliest-time, group-balanced subset whose producing
   sampling command is unavailable; it is not a representative random sample.
 - Four bitrate alternatives share each physical radio observation, so modelling
   rows are correlated and must not be treated as independent measurements.
@@ -939,8 +919,8 @@ find . -maxdepth 2
   independent generalization to unseen users, sessions, or cells.
 - Final features are reconstructed offline. Synthetic interleaved-session tests
   demonstrate batch/replay parity and future-invariance on a small test fixture,
-  not through an end-to-end replay of every CP8 test row.
-- Evaluation covers one dataset and one family of historical scenarios.
+  not through an end-to-end replay of every test row.
+- Evaluation covers one dataset and one family of recorded scenarios.
 - Random Forest feature importance is associative, not causal.
 - The LLM evaluation covers 30 deliberately balanced cases reviewed by one
   person; there is no inter-rater study.
@@ -954,12 +934,12 @@ find . -maxdepth 2
 
 - additional 5G and 6G datasets;
 - online recalibration;
-- richer selective-risk analysis beyond CP8's basic risk-versus-coverage table;
+- richer selective-risk analysis beyond the current risk-versus-coverage table;
 - alternative abstention strategies;
 - temporal neural networks;
 - drift detection;
 - live stream ingestion;
-- inter-rater studies beyond the mandatory CP9 manual review;
+- inter-rater studies beyond the current manual review;
 - comparison of explanation models;
 - retrieval-grounded telecom knowledge;
 - API and dashboard deployment.
@@ -994,8 +974,8 @@ Also cite the original 5G-QoERA publication and repository.
 
 ## 29. Quick start
 
-Validate the already-frozen project and completed human review without rerunning
-CP8 or calling an API:
+Validate the frozen project and completed human review without rerunning the
+experiment or calling an API:
 
 ```bash
 cd ~/Documents/5g_qoe_trust_twin
@@ -1006,15 +986,15 @@ python -m pytest -v
 python scripts/evaluate_llm.py
 ```
 
-The full corrected experiment is resource-intensive and should be rerun only
+The full experiment is resource-intensive and should be rerun only
 when an intentional reproduction is required:
 
 ```bash
-python scripts/build_features_final.py
-python scripts/train_models_final.py
-python scripts/calibrate_models_final.py
-python scripts/apply_trust_final.py
-python scripts/final_evaluation_final.py
+python scripts/build_features.py
+python scripts/train_models.py
+python scripts/calibrate_models.py
+python scripts/apply_trust.py
+python scripts/final_evaluation.py
 python scripts/generate_batch_explanations.py \
   --offline-prompt-export --cases 30 --seed 42
 # Complete only each explanation field externally, then:

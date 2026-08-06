@@ -113,6 +113,7 @@ def test_cross_layer_random_forest_predicts_probabilities() -> None:
         n_estimators=10,
         max_depth=4,
         min_samples_leaf=1,
+        n_jobs=1,
     )
 
     model.fit(

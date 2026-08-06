@@ -1,4 +1,4 @@
-"""Focused synthetic checks for the CP9 Phase A offline prompt export."""
+"""Focused synthetic checks for offline explanation prompt export."""
 
 from __future__ import annotations
 
@@ -49,11 +49,11 @@ def _candidate_frame() -> pd.DataFrame:
     )
 
 
-def test_phase_a_selection_is_exact_and_deterministic() -> None:
+def test_review_selection_is_exact_and_deterministic() -> None:
     frame = _candidate_frame()
 
-    first = batch.select_phase_a_cases(frame, random_seed=42)
-    second = batch.select_phase_a_cases(frame, random_seed=42)
+    first = batch.select_review_cases(frame, random_seed=42)
+    second = batch.select_review_cases(frame, random_seed=42)
 
     assert first["source_id"].tolist() == second["source_id"].tolist()
     assert first["category"].value_counts(sort=False).to_dict() == {
@@ -69,10 +69,10 @@ def test_phase_a_selection_is_exact_and_deterministic() -> None:
     assert not first[batch.ROW_ID_COLUMNS].duplicated().any()
 
 
-def test_offline_export_uses_cp7_prompt_path_and_empty_explanations(
+def test_offline_export_uses_configured_prompt_path_and_empty_explanations(
     tmp_path: Path,
 ) -> None:
-    selected = batch.select_phase_a_cases(
+    selected = batch.select_review_cases(
         _candidate_frame(),
         random_seed=42,
     )
@@ -132,7 +132,7 @@ def _valid_explanation(record: dict[str, object]) -> dict[str, object]:
 def test_completed_import_validates_and_leaves_human_fields_empty(
     tmp_path: Path,
 ) -> None:
-    selected = batch.select_phase_a_cases(
+    selected = batch.select_review_cases(
         _candidate_frame(),
         random_seed=42,
     )
@@ -189,7 +189,7 @@ def test_completed_import_validates_and_leaves_human_fields_empty(
 def test_completed_import_records_schema_errors_without_human_judgment(
     tmp_path: Path,
 ) -> None:
-    selected = batch.select_phase_a_cases(
+    selected = batch.select_review_cases(
         _candidate_frame(),
         random_seed=42,
     )

@@ -1,18 +1,26 @@
-"""Calibrate prototype model probabilities using chronological data."""
+"""Calibrate model probabilities using chronological validation data."""
 
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 from pathlib import Path
 
 import joblib
 import numpy as np
 import pandas as pd
 
+from qoe_twin.artifact_lineage import (
+    load_resolved_configuration,
+    require_feature_columns,
+    validate_model_lineage,
+    write_calibrator_lineage,
+)
 from qoe_twin.calibration import (
     ProbabilityCalibrator,
     calibration_table,
 )
+from qoe_twin.config import LoadedConfiguration
 from qoe_twin.features import (
     get_cross_layer_feature_names,
     get_network_feature_names,
@@ -21,10 +29,17 @@ from qoe_twin.metrics import (
     classification_metrics,
     find_best_f1_threshold,
 )
-
+from qoe_twin.splitting import split_validation_chronologically
+from qoe_twin.trust import (
+    TrustPolicy,
+    calculate_configured_reliability_score,
+    calculate_data_quality,
+    calculate_prediction_stability,
+    select_validation_abstention_threshold,
+)
 
 DATA_PATH = Path(
-    "data/processed/qoe_features_prototype.parquet"
+    "data/processed/qoe_features_final.parquet"
 )
 
 MODEL_DIRECTORY = Path("models/uncalibrated")
@@ -33,51 +48,57 @@ CALIBRATED_DIRECTORY = Path("models/calibrated")
 TABLE_DIRECTORY = Path("results/tables")
 METRIC_DIRECTORY = Path("results/metrics")
 PREDICTION_DIRECTORY = Path("results/predictions")
+CONFIG_DIRECTORY = Path("configs")
+RISK_COVERAGE_PATH = (
+    TABLE_DIRECTORY / "final_rf_validation_risk_coverage.csv"
+)
 
-TARGET_COLUMN = "future_poor_qoe"
+def save_final_random_forest_calibrator(
+    calibrator: ProbabilityCalibrator,
+    *,
+    calibration_method: str,
+    configuration: LoadedConfiguration,
+    numeric_features: list[str],
+    categorical_features: list[str],
+    parent_model_sha256: str,
+) -> Path:
+    """Save one supported final RF calibrator and its lineage sidecar."""
+    if calibration_method not in {"sigmoid", "isotonic"}:
+        raise ValueError(
+            "Final Random Forest calibrator method must be "
+            "'sigmoid' or 'isotonic'."
+        )
+    calibrator_path = CALIBRATED_DIRECTORY / (
+        "cross_layer_random_forest_"
+        f"{calibration_method}_final.joblib"
+    )
+    joblib.dump(calibrator, calibrator_path)
+    write_calibrator_lineage(
+        calibrator_path,
+        configuration=configuration,
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+        parent_model_sha256=parent_model_sha256,
+    )
+    return calibrator_path
 
 
-def split_validation_chronologically(
-    validation: pd.DataFrame,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Split validation into calibration and threshold-selection periods.
-    """
-    timestamps = (
-        validation["timestamp"]
-        .drop_duplicates()
-        .sort_values()
-        .reset_index(drop=True)
+def required_final_random_forest_artifact_path(
+    model_directory: Path = MODEL_DIRECTORY,
+) -> Path:
+    """Return the required final RF path or fail closed."""
+    artifact_path = (
+        model_directory
+        / "cross_layer_random_forest_final.joblib"
     )
 
-    midpoint = timestamps.iloc[
-        len(timestamps) // 2
-    ]
-
-    calibration = validation[
-        validation["timestamp"] < midpoint
-    ].copy()
-
-    selection = validation[
-        validation["timestamp"] >= midpoint
-    ].copy()
-
-    if calibration.empty or selection.empty:
-        raise ValueError(
-            "Calibration and selection periods "
-            "must both contain observations."
+    if not artifact_path.is_file():
+        raise FileNotFoundError(
+            "Required final Random Forest artifact is missing: "
+            f"{artifact_path}"
         )
 
-    if (
-        calibration["timestamp"].max()
-        >= selection["timestamp"].min()
-    ):
-        raise ValueError(
-            "Calibration and threshold-selection "
-            "periods overlap."
-        )
-
-    return calibration, selection
+    return artifact_path
 
 
 def get_feature_lists(
@@ -86,18 +107,29 @@ def get_feature_lists(
     list[str],
     list[str],
 ]:
-    """Return network and cross-layer model feature lists."""
-    network_features = [
-        feature
-        for feature in get_network_feature_names()
-        if feature in frame.columns
-    ]
-
-    cross_features = [
+    """Return complete model feature lists or fail clearly."""
+    network_features = list(get_network_feature_names())
+    categorical_features = ["resolution"]
+    cross_numeric_features = [
         feature
         for feature in get_cross_layer_feature_names()
-        if feature in frame.columns
+        if feature not in categorical_features
     ]
+    cross_features = [
+        *cross_numeric_features,
+        *categorical_features,
+    ]
+
+    require_feature_columns(
+        frame.columns,
+        network_features,
+        context="final network calibration",
+    )
+    require_feature_columns(
+        frame.columns,
+        cross_features,
+        context="final Random Forest calibration",
+    )
 
     return network_features, cross_features
 
@@ -145,6 +177,8 @@ def save_selection_predictions(
     calibration_method: str,
     probability: np.ndarray,
     threshold: float,
+    *,
+    target_column: str,
 ) -> None:
     """Save probabilities and decisions."""
     output = selection[
@@ -154,7 +188,7 @@ def save_selection_predictions(
             "timestamp",
             "future_timestamp",
             "prediction_lead_seconds",
-            TARGET_COLUMN,
+            target_column,
         ]
     ].copy()
 
@@ -174,7 +208,7 @@ def save_selection_predictions(
         PREDICTION_DIRECTORY
         / (
             f"{model_name}_{calibration_method}"
-            "_selection_predictions.parquet"
+            "_final_selection_predictions.parquet"
         )
     )
 
@@ -184,22 +218,133 @@ def save_selection_predictions(
     )
 
 
+def build_validation_trust_scores(
+    selection: pd.DataFrame,
+    probability: np.ndarray,
+    *,
+    target_column: str,
+    feature_names: list[str],
+    decision_threshold: float,
+    validation_f1: float,
+    validation_ece: float,
+    policy: TrustPolicy,
+) -> pd.DataFrame:
+    """Calculate threshold-independent trust scores on validation half two."""
+    probabilities = np.asarray(probability, dtype=float).reshape(-1)
+    if len(selection) != len(probabilities):
+        raise ValueError(
+            "Selection probabilities must align one-to-one with validation rows."
+        )
+
+    ordered = selection.copy()
+    ordered["calibrated_probability"] = probabilities
+    ordered = ordered.sort_values(
+        ["timestamp", "session_id"],
+        kind="stable",
+    ).reset_index(drop=True)
+
+    previous_probability_by_session: dict[str, list[float]] = defaultdict(list)
+    records: list[dict[str, object]] = []
+
+    for _, row in ordered.iterrows():
+        session_id = str(row["session_id"])
+        selected_probability = float(row["calibrated_probability"])
+        previous_probabilities = previous_probability_by_session[session_id]
+        stability = calculate_prediction_stability(
+            selected_probability,
+            previous_probabilities,
+            window=5,
+        )
+        data_quality = calculate_data_quality(row, feature_names)
+        trust_score = calculate_configured_reliability_score(
+            probability=selected_probability,
+            decision_threshold=decision_threshold,
+            validation_f1=validation_f1,
+            validation_ece=validation_ece,
+            data_quality=data_quality,
+            prediction_stability=stability,
+            policy=policy,
+        )
+        records.append(
+            {
+                "session_id": session_id,
+                "timestamp": row["timestamp"],
+                "split": "validation",
+                "target": int(row[target_column]),
+                "prediction": int(
+                    selected_probability >= decision_threshold
+                ),
+                "trust_score": trust_score,
+            }
+        )
+        previous_probabilities.append(selected_probability)
+
+    return pd.DataFrame(records)
+
+
 def main() -> None:
     """Calibrate and compare model probabilities."""
-    frame = pd.read_parquet(DATA_PATH)
+    final_random_forest_path = (
+        required_final_random_forest_artifact_path(
+            MODEL_DIRECTORY
+        )
+    )
+
+    configuration = load_resolved_configuration(
+        CONFIG_DIRECTORY
+    )
+    categorical_features = ["resolution"]
+    cross_numeric_features = [
+        feature
+        for feature in get_cross_layer_feature_names()
+        if feature not in categorical_features
+    ]
+    model_lineage = validate_model_lineage(
+        final_random_forest_path,
+        configuration=configuration,
+        numeric_features=cross_numeric_features,
+        categorical_features=categorical_features,
+    )
+    model_configuration = configuration.values["model"]
+    target_column = str(
+        model_configuration["target"]["name"]
+    )
+    calibration_configuration = model_configuration[
+        "calibration"
+    ]
+    calibration_methods = list(
+        calibration_configuration["methods"]
+    )
+    calibration_fraction = float(
+        calibration_configuration["fit_fraction"]
+    )
+    random_seed = int(
+        model_configuration["experiment"]["random_seed"]
+    )
+
+    frame = pd.read_parquet(
+        DATA_PATH,
+        filters=[("split", "==", "validation")],
+    )
 
     validation = frame[
         frame["split"].eq("validation")
-        & frame[TARGET_COLUMN].notna()
+        & frame[target_column].notna()
     ].copy()
 
-    validation[TARGET_COLUMN] = (
-        validation[TARGET_COLUMN].astype(int)
+    validation[target_column] = (
+        validation[target_column].astype(int)
     )
+    validation = validation.sort_values(
+        ["timestamp", "session_id"],
+        kind="stable",
+    ).reset_index(drop=True)
 
     calibration_frame, selection_frame = (
         split_validation_chronologically(
-            validation
+            validation,
+            calibration_fraction=calibration_fraction,
+            target_column=target_column,
         )
     )
 
@@ -212,18 +357,12 @@ def main() -> None:
         "network_logistic": {
             "path": (
                 MODEL_DIRECTORY
-                / "network_logistic_prototype.joblib"
+                / "network_logistic_final.joblib"
             ),
             "features": network_features,
         },
         "cross_layer_random_forest": {
-            "path": (
-                MODEL_DIRECTORY
-                / (
-                    "cross_layer_random_forest"
-                    "_prototype.joblib"
-                )
-            ),
+            "path": final_random_forest_path,
             "features": cross_features,
         },
     }
@@ -246,21 +385,19 @@ def main() -> None:
     )
 
     y_calibration = calibration_frame[
-        TARGET_COLUMN
+        target_column
     ].to_numpy()
 
     y_selection = selection_frame[
-        TARGET_COLUMN
+        target_column
     ].to_numpy()
 
     result_rows: list[dict] = []
     threshold_rows: list[pd.DataFrame] = []
     reliability_rows: list[pd.DataFrame] = []
 
-    selected_configuration: dict[
-        str,
-        dict[str, float | str],
-    ] = {}
+    selected_configuration: dict[str, dict[str, object]] = {}
+    selected_rf_probability: np.ndarray | None = None
 
     print("CALIBRATION DATA")
     print("=" * 70)
@@ -309,18 +446,12 @@ def main() -> None:
         probability_variants: dict[
             str,
             np.ndarray,
-        ] = {
-            "uncalibrated": (
-                raw_selection_probability
-            )
-        }
+        ] = {}
 
-        for method in [
-            "sigmoid",
-            "isotonic",
-        ]:
+        for method in calibration_methods:
             calibrator = ProbabilityCalibrator(
-                method=method
+                method=method,
+                random_seed=random_seed,
             )
 
             calibrator.fit(
@@ -338,15 +469,26 @@ def main() -> None:
                 method
             ] = calibrated_probability
 
-            calibrator_path = (
-                CALIBRATED_DIRECTORY
-                / f"{model_name}_{method}.joblib"
-            )
-
-            joblib.dump(
-                calibrator,
-                calibrator_path,
-            )
+            if model_name == "cross_layer_random_forest":
+                save_final_random_forest_calibrator(
+                    calibrator,
+                    calibration_method=method,
+                    configuration=configuration,
+                    numeric_features=cross_numeric_features,
+                    categorical_features=categorical_features,
+                    parent_model_sha256=(
+                        model_lineage.artifact_sha256
+                    ),
+                )
+            else:
+                calibrator_path = (
+                    CALIBRATED_DIRECTORY
+                    / f"{model_name}_{method}_final.joblib"
+                )
+                joblib.dump(
+                    calibrator,
+                    calibrator_path,
+                )
 
         model_results = []
 
@@ -391,6 +533,7 @@ def main() -> None:
                 calibration_method=method,
                 probability=probability,
                 threshold=threshold,
+                target_column=target_column,
             )
 
         best = min(
@@ -425,6 +568,66 @@ def main() -> None:
             ),
         }
 
+        if model_name == "cross_layer_random_forest":
+            selected_rf_probability = probability_variants[
+                str(best["calibration_method"])
+            ]
+
+    if selected_rf_probability is None:
+        raise RuntimeError(
+            "Final Random Forest validation probabilities were not produced."
+        )
+
+    selected_rf = selected_configuration["cross_layer_random_forest"]
+    trust_policy = TrustPolicy.from_mapping(
+        configuration.values["trust"]
+    )
+    validation_trust = build_validation_trust_scores(
+        selection_frame,
+        selected_rf_probability,
+        target_column=target_column,
+        feature_names=cross_features,
+        decision_threshold=float(selected_rf["decision_threshold"]),
+        validation_f1=float(selected_rf["f1"]),
+        validation_ece=float(selected_rf["expected_calibration_error"]),
+        policy=trust_policy,
+    )
+    abstention_threshold, risk_coverage = (
+        select_validation_abstention_threshold(
+            validation_trust,
+            target_column="target",
+            prediction_column="prediction",
+            minimum_coverage=trust_policy.minimum_coverage,
+        )
+    )
+    risk_coverage["selective_accuracy"] = (
+        1.0 - risk_coverage["selective_risk"]
+    )
+    risk_coverage["minimum_coverage"] = trust_policy.minimum_coverage
+    risk_coverage["selected"] = risk_coverage[
+        "abstention_threshold"
+    ].eq(abstention_threshold)
+    selected_risk = risk_coverage.loc[
+        risk_coverage["selected"]
+    ].iloc[0]
+
+    selected_rf.update(
+        {
+            "abstention_threshold": abstention_threshold,
+            "abstention_minimum_coverage": trust_policy.minimum_coverage,
+            "abstention_validation_coverage": float(
+                selected_risk["coverage"]
+            ),
+            "abstention_validation_selective_accuracy": float(
+                selected_risk["selective_accuracy"]
+            ),
+            "abstention_validation_selective_risk": float(
+                selected_risk["selective_risk"]
+            ),
+        }
+    )
+    risk_coverage.to_csv(RISK_COVERAGE_PATH, index=False)
+
     comparison = pd.DataFrame(
         result_rows
     )
@@ -455,7 +658,7 @@ def main() -> None:
 
     comparison_path = (
         TABLE_DIRECTORY
-        / "prototype_calibration_comparison.csv"
+        / "final_calibration_comparison.csv"
     )
 
     comparison.to_csv(
@@ -468,7 +671,7 @@ def main() -> None:
         ignore_index=True,
     ).to_csv(
         TABLE_DIRECTORY
-        / "prototype_calibrated_threshold_curves.csv",
+        / "final_calibrated_threshold_curves.csv",
         index=False,
     )
 
@@ -477,18 +680,49 @@ def main() -> None:
         ignore_index=True,
     ).to_csv(
         TABLE_DIRECTORY
-        / "prototype_reliability_data.csv",
+        / "final_reliability_data.csv",
         index=False,
     )
 
     selection_path = (
         METRIC_DIRECTORY
-        / "selected_calibration_configuration.json"
+        / "selected_calibration_configuration_final.json"
     )
 
+    selection_document = {
+        "schema_version": 1,
+        "configuration_sha256": configuration.sha256,
+        "selection_policy": {
+            "calibration_method": (
+                "minimum expected_calibration_error, then minimum brier_score, "
+                "then maximum f1"
+            ),
+            "decision_threshold": (
+                "maximum validation-half-two F1, then precision, on the frozen "
+                "0.05-to-0.95 grid with 0.01 step"
+            ),
+            "abstention_threshold": (
+                "minimum selective risk subject to YAML minimum coverage; "
+                "ties prefer higher coverage then higher threshold"
+            ),
+        },
+        "validation_periods": {
+            "calibrator_fit": {
+                "rows": len(calibration_frame),
+                "start_timestamp": calibration_frame["timestamp"].min().isoformat(),
+                "end_timestamp": calibration_frame["timestamp"].max().isoformat(),
+            },
+            "selection": {
+                "rows": len(selection_frame),
+                "start_timestamp": selection_frame["timestamp"].min().isoformat(),
+                "end_timestamp": selection_frame["timestamp"].max().isoformat(),
+            },
+        },
+        **selected_configuration,
+    }
     selection_path.write_text(
         json.dumps(
-            selected_configuration,
+            selection_document,
             indent=2,
         ),
         encoding="utf-8",
@@ -515,13 +749,14 @@ def main() -> None:
     print("\nSelected configurations:")
     print(
         json.dumps(
-            selected_configuration,
+            selection_document,
             indent=2,
         )
     )
 
     print("\nSaved:")
     print(f"- {comparison_path}")
+    print(f"- {RISK_COVERAGE_PATH}")
     print(f"- {selection_path}")
 
 

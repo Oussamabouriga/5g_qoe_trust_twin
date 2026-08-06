@@ -34,13 +34,13 @@ FEATURE_PATH = Path(
 
 OUTPUT_DIRECTORY = Path("results/explanations")
 OFFLINE_PROMPT_PATH = (
-    OUTPUT_DIRECTORY / "cp9_phase_a_prompts.jsonl"
+    OUTPUT_DIRECTORY / "explanation_prompts.jsonl"
 )
 COMPLETED_PROMPT_PATH = (
-    OUTPUT_DIRECTORY / "cp9_phase_a_completed.jsonl"
+    OUTPUT_DIRECTORY / "final_explanations.jsonl"
 )
 MANUAL_REVIEW_PATH = (
-    OUTPUT_DIRECTORY / "cp9_phase_a_manual_review.csv"
+    OUTPUT_DIRECTORY / "manual_review_template.csv"
 )
 CONFIG_DIRECTORY = Path("configs")
 SELECTION_PATH = Path(
@@ -78,7 +78,7 @@ def parse_arguments() -> argparse.Namespace:
         "--offline-prompt-export",
         action="store_true",
         help=(
-            "Export the fixed CP9 Phase A prompt batch without constructing "
+            "Export the fixed review prompt batch without constructing "
             "an API client."
         ),
     )
@@ -87,7 +87,7 @@ def parse_arguments() -> argparse.Namespace:
         "--import-completed-jsonl",
         action="store_true",
         help=(
-            "Validate the completed CP9 JSONL and create the manual-review CSV."
+            "Validate the completed explanation JSONL and create the review CSV."
         ),
     )
 
@@ -202,11 +202,11 @@ def select_diverse_cases(
     ).reset_index(drop=True)
 
 
-def select_phase_a_cases(
+def select_review_cases(
     frame: pd.DataFrame,
     random_seed: int,
 ) -> pd.DataFrame:
-    """Select the fixed CP9 Phase A 10/10/10 decision strata."""
+    """Select the fixed 10/10/10 decision strata for human review."""
     required_columns = {
         *ROW_ID_COLUMNS,
         "abstain",
@@ -215,12 +215,12 @@ def select_phase_a_cases(
     missing = sorted(required_columns - set(frame.columns))
     if missing:
         raise ValueError(
-            "CP9 case selection is missing required columns: "
+            "Explanation case selection is missing required columns: "
             + ", ".join(missing)
         )
     if frame[list(required_columns)].isna().any().any():
         raise ValueError(
-            "CP9 case selection requires non-null row identities and decisions."
+            "Explanation case selection requires non-null row identities and decisions."
         )
 
     predicted = frame["predicted_poor_qoe"].astype(int)
@@ -252,7 +252,7 @@ def select_phase_a_cases(
         )
         if len(candidates) < 10:
             raise ValueError(
-                f"CP9 category {category!r} has {len(candidates)} rows; "
+                f"Review category {category!r} has {len(candidates)} rows; "
                 "at least 10 are required."
             )
         selected = candidates.sample(
@@ -275,7 +275,7 @@ def select_phase_a_cases(
 def build_offline_prompt_records(
     selected: pd.DataFrame,
 ) -> list[dict[str, Any]]:
-    """Build prompt-only records through the normal CP7 evidence path."""
+    """Build prompt-only records through the configured evidence path."""
     records: list[dict[str, Any]] = []
     for index, (_, row) in enumerate(
         selected.iterrows(),
@@ -398,7 +398,7 @@ def import_completed_explanations(
     )
     if len(prompts) != 30 or len(completed) != 30:
         raise ValueError(
-            "CP9 Phase A import requires exactly 30 prompt and completed records."
+            "Explanation import requires exactly 30 prompt and completed records."
         )
 
     expected_case_ids = [
@@ -522,7 +522,7 @@ def import_completed_explanations(
 
 
 def validate_frozen_prediction_chain() -> None:
-    """Authenticate the exact CP8 prediction chain before reading it."""
+    """Authenticate the exact frozen prediction chain before reading it."""
     configuration = load_resolved_configuration(
         CONFIG_DIRECTORY
     )
@@ -618,7 +618,7 @@ def main() -> None:
             COMPLETED_PROMPT_PATH,
             MANUAL_REVIEW_PATH,
         )
-        print("CP9 Phase A automatic validation:")
+        print("Explanation batch automatic validation:")
         for key, value in summary.items():
             print(f"- {key}: {value}")
         print(f"Saved manual-review CSV to {MANUAL_REVIEW_PATH}")
@@ -674,9 +674,9 @@ def main() -> None:
     if args.offline_prompt_export:
         if args.cases != 30:
             raise ValueError(
-                "CP9 Phase A offline export requires exactly 30 cases."
+                "Offline explanation export requires exactly 30 cases."
             )
-        selected = select_phase_a_cases(
+        selected = select_review_cases(
             frame=frame,
             random_seed=args.seed,
         )

@@ -13,7 +13,7 @@ import pandas as pd
 
 @dataclass(frozen=True)
 class TrustResult:
-    """Historical prototype trust result retained for CP1 compatibility."""
+    """Trust result for direct component-based calculations."""
 
     trust_score: float
     trust_level: str
@@ -320,10 +320,10 @@ def _configured_reliability_components(
 def require_selected_abstention_threshold(
     selected_configuration: Mapping[str, Any],
 ) -> float:
-    """Require the validation-selected CP8 threshold without a fallback."""
+    """Require the validation-selected threshold without a fallback."""
     if "abstention_threshold" not in selected_configuration:
         raise ValueError(
-            "The CP8 validation-selected abstention_threshold is missing; "
+            "The validation-selected abstention_threshold is missing; "
             "final trust inference is blocked."
         )
     return _unit_interval_value(
@@ -535,7 +535,7 @@ def calculate_trust(
     stability_weight: float = 0.10,
     abstention_threshold: float = 0.55,
 ) -> TrustResult:
-    """Calculate the historical prototype score retained for CP1 only."""
+    """Calculate a weighted trust score from explicit component inputs."""
     confidence = probability_confidence(
         probability,
         decision_threshold=0.5,

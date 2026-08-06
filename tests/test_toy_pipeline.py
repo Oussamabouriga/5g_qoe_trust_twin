@@ -1,7 +1,7 @@
 """Artifact-independent smoke test for the replay-to-evaluation pipeline.
 
 The replacement roadmap assigns threshold-aware trust and semantic LLM
-validation to CP7. CP6 replay parity is covered separately in
+validation. Replay parity is covered separately in
 ``test_replay_parity.py``.
 """
 

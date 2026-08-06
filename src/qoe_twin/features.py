@@ -5,7 +5,6 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-
 EARTH_RADIUS_KM = 6371.0088
 
 ORDER_COLUMNS = [
