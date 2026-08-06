@@ -1,0 +1,77 @@
+{
+  "by_prediction_category": {
+    "abstention": {
+      "complete_cases": 10,
+      "completeness_rate": 1.0,
+      "contradiction_cases": 0,
+      "contradiction_rate": 0.0,
+      "factual_correct_cases": 10,
+      "factual_correctness_rate": 1.0,
+      "reviewed_cases": 10,
+      "unsupported_statement_cases": 0,
+      "unsupported_statement_rate": 0.0
+    },
+    "accepted_acceptable_qoe": {
+      "complete_cases": 10,
+      "completeness_rate": 1.0,
+      "contradiction_cases": 0,
+      "contradiction_rate": 0.0,
+      "factual_correct_cases": 10,
+      "factual_correctness_rate": 1.0,
+      "reviewed_cases": 10,
+      "unsupported_statement_cases": 0,
+      "unsupported_statement_rate": 0.0
+    },
+    "accepted_poor_qoe": {
+      "complete_cases": 10,
+      "completeness_rate": 1.0,
+      "contradiction_cases": 0,
+      "contradiction_rate": 0.0,
+      "factual_correct_cases": 10,
+      "factual_correctness_rate": 1.0,
+      "reviewed_cases": 10,
+      "unsupported_statement_cases": 0,
+      "unsupported_statement_rate": 0.0
+    }
+  },
+  "limitations": [
+    "Human judgments were supplied by 1 reviewer(s).",
+    "No inter-rater reliability estimate is available.",
+    "The balanced 30-case review is small and not prevalence weighted.",
+    "The external LLM model and request metadata were not retained."
+  ],
+  "overall": {
+    "complete_cases": 30,
+    "completeness_rate": 1.0,
+    "contradiction_cases": 0,
+    "contradiction_rate": 0.0,
+    "factual_correct_cases": 30,
+    "factual_correctness_rate": 1.0,
+    "reviewed_cases": 30,
+    "unsupported_statement_cases": 0,
+    "unsupported_statement_rate": 0.0
+  },
+  "schema_version": 1,
+  "source_artifacts": {
+    "completed_explanations": {
+      "path": "results/explanations/cp9_phase_a_completed.jsonl",
+      "sha256": "4e4a531ec23537dbd4f82d64f86ef949ebf5045c7abc2d80dd93bb3cefb0dcf5"
+    },
+    "completed_manual_review": {
+      "path": "results/explanations/cp9_phase_a_manual_review_completed.csv",
+      "sha256": "dedbacb86c3dd6c503e3d5aceaf377e6fe6593a1d814f959a23a338245234281"
+    }
+  },
+  "validation": {
+    "category_counts": {
+      "abstention": 10,
+      "accepted_acceptable_qoe": 10,
+      "accepted_poor_qoe": 10
+    },
+    "completed_human_review_cases": 30,
+    "grounding_valid_cases": 30,
+    "matching_unique_case_ids": 30,
+    "reviewer_count": 1,
+    "schema_valid_cases": 30
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "configuration_sha256": "76c11271c2a06feaca05f383f397e694a7f58c56110a95f1e75e8c7b99de5c80",
+  "selection_policy": {
+    "calibration_method": "minimum expected_calibration_error, then minimum brier_score, then maximum f1",
+    "decision_threshold": "maximum validation-half-two F1, then precision, on the frozen 0.05-to-0.95 grid with 0.01 step",
+    "abstention_threshold": "minimum selective risk subject to YAML minimum coverage; ties prefer higher coverage then higher threshold"
+  },
+  "validation_periods": {
+    "calibrator_fit": {
+      "rows": 90208,
+      "start_timestamp": "2014-02-04T19:31:46.106027+00:00",
+      "end_timestamp": "2014-02-05T09:36:16.357916+00:00"
+    },
+    "selection": {
+      "rows": 89952,
+      "start_timestamp": "2014-02-05T09:36:31.647073+00:00",
+      "end_timestamp": "2014-02-06T07:33:43.930583+00:00"
+    }
+  },
+  "network_logistic": {
+    "calibration_method": "isotonic",
+    "decision_threshold": 0.35000000000000003,
+    "f1": 0.6669995123423821,
+    "pr_auc": 0.6297264086331162,
+    "brier_score": 0.188643040361495,
+    "expected_calibration_error": 0.012425270322566403
+  },
+  "cross_layer_random_forest": {
+    "calibration_method": "isotonic",
+    "decision_threshold": 0.37000000000000005,
+    "f1": 0.8679872278329216,
+    "pr_auc": 0.9462698351013165,
+    "brier_score": 0.0740676687325214,
+    "expected_calibration_error": 0.012073271253851669,
+    "abstention_threshold": 0.6711849773025693,
+    "abstention_minimum_coverage": 0.9,
+    "abstention_validation_coverage": 0.902003290643899,
+    "abstention_validation_selective_accuracy": 0.9315232261483664,
+    "abstention_validation_selective_risk": 0.06847677385163366
+  }
+}

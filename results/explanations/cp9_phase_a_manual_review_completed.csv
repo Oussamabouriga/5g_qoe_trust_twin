@@ -1,0 +1,1291 @@
+case_id,prediction,evidence_json,prompt,explanation_json,automatic_validation_errors,reviewer_id,correctness,completeness,unsupported_statement_present,contradiction_present,review_notes
+case_001,future_poor_qoe,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": -5.208, ""current_mos"": 1.0, ""plr_percent"": 65.1, ""prediction"": ""future_poor_qoe"", ""prediction_probability"": 1.0, ""throughput_mbps"": 2.792, ""throughput_to_bitrate_ratio"": 0.349, ""trust_level"": ""high"", ""trust_score"": 0.958}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation poor-QoE forecast. Do not claim that degradation has already occurred or that its onset time is known.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": -5.208,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 65.1,
+  ""prediction"": ""future_poor_qoe"",
+  ""prediction_probability"": 1.0,
+  ""throughput_mbps"": 2.792,
+  ""throughput_to_bitrate_ratio"": 0.349,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.958
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_poor_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts poor QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is below the configured bitrate demand, producing a negative capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The packet-loss evidence is elevated and is consistent with impaired delivery.""}, {""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS indicates poor service quality at the present observation.""}], ""limitations"": ""The evidence supports the forecast but does not identify a unique underlying network fault or establish when conditions may change."", ""prediction"": ""future_poor_qoe"", ""recommended_operator_checks"": [""Verify throughput delivery against the configured bitrate and inspect the packet-loss measurement."", ""Confirm the current MOS measurement and check whether the same conditions persist in later observations.""], ""summary"": ""The model forecasts poor QoE at the next observation, and the supplied operational evidence is consistent with that forecast.""}",[],Ahmed,1,1,0,0,OK
+case_002,future_poor_qoe,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": -2.76, ""current_mos"": 1.0, ""plr_percent"": 46.0, ""prediction"": ""future_poor_qoe"", ""prediction_probability"": 0.98, ""throughput_mbps"": 3.24, ""throughput_to_bitrate_ratio"": 0.54, ""trust_level"": ""high"", ""trust_score"": 0.9453}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation poor-QoE forecast. Do not claim that degradation has already occurred or that its onset time is known.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": -2.76,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 46.0,
+  ""prediction"": ""future_poor_qoe"",
+  ""prediction_probability"": 0.98,
+  ""throughput_mbps"": 3.24,
+  ""throughput_to_bitrate_ratio"": 0.54,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.9453
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_poor_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts poor QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is below the configured bitrate demand, producing a negative capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The packet-loss evidence is elevated and is consistent with impaired delivery.""}, {""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS indicates poor service quality at the present observation.""}], ""limitations"": ""The evidence supports the forecast but does not identify a unique underlying network fault or establish when conditions may change."", ""prediction"": ""future_poor_qoe"", ""recommended_operator_checks"": [""Verify throughput delivery against the configured bitrate and inspect the packet-loss measurement."", ""Confirm the current MOS measurement and check whether the same conditions persist in later observations.""], ""summary"": ""The model forecasts poor QoE at the next observation, and the supplied operational evidence is consistent with that forecast.""}",[],Ahmed,1,1,0,0,OK
+case_003,future_poor_qoe,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": -3.264, ""current_mos"": 1.0, ""plr_percent"": 40.8, ""prediction"": ""future_poor_qoe"", ""prediction_probability"": 0.8496, ""throughput_mbps"": 4.736, ""throughput_to_bitrate_ratio"": 0.592, ""trust_level"": ""high"", ""trust_score"": 0.8625}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation poor-QoE forecast. Do not claim that degradation has already occurred or that its onset time is known.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": -3.264,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 40.8,
+  ""prediction"": ""future_poor_qoe"",
+  ""prediction_probability"": 0.8496,
+  ""throughput_mbps"": 4.736,
+  ""throughput_to_bitrate_ratio"": 0.592,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.8625
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_poor_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts poor QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is below the configured bitrate demand, producing a negative capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The packet-loss evidence is elevated and is consistent with impaired delivery.""}, {""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS indicates poor service quality at the present observation.""}], ""limitations"": ""The evidence supports the forecast but does not identify a unique underlying network fault or establish when conditions may change."", ""prediction"": ""future_poor_qoe"", ""recommended_operator_checks"": [""Verify throughput delivery against the configured bitrate and inspect the packet-loss measurement."", ""Confirm the current MOS measurement and check whether the same conditions persist in later observations.""], ""summary"": ""The model forecasts poor QoE at the next observation, and the supplied operational evidence is consistent with that forecast.""}",[],Ahmed,1,1,0,0,OK
+case_004,future_poor_qoe,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": -8.0, ""current_mos"": 1.0, ""plr_percent"": 100.0, ""prediction"": ""future_poor_qoe"", ""prediction_probability"": 0.6543, ""throughput_mbps"": 0.0, ""throughput_to_bitrate_ratio"": 0.0, ""trust_level"": ""medium"", ""trust_score"": 0.7385}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation poor-QoE forecast. Do not claim that degradation has already occurred or that its onset time is known.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": -8.0,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 100.0,
+  ""prediction"": ""future_poor_qoe"",
+  ""prediction_probability"": 0.6543,
+  ""throughput_mbps"": 0.0,
+  ""throughput_to_bitrate_ratio"": 0.0,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.7385
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_poor_qoe"",
+  ""confidence"": ""medium"",
+  ""summary"": ""The model forecasts poor QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""medium"", ""likely_causes"": [{""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""No delivered throughput is observed while a bitrate demand is configured, leaving a negative capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The packet-loss evidence is elevated and is consistent with impaired delivery.""}, {""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS indicates poor service quality at the present observation.""}], ""limitations"": ""The evidence supports the forecast but does not identify a unique underlying network fault or establish when conditions may change."", ""prediction"": ""future_poor_qoe"", ""recommended_operator_checks"": [""Verify throughput delivery against the configured bitrate and inspect the packet-loss measurement."", ""Confirm the current MOS measurement and check whether the same conditions persist in later observations.""], ""summary"": ""The model forecasts poor QoE at the next observation, and the supplied operational evidence is consistent with that forecast.""}",[],Ahmed,1,1,0,0,OK
+case_005,future_poor_qoe,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": -3.208, ""current_mos"": 1.0, ""plr_percent"": 53.467, ""prediction"": ""future_poor_qoe"", ""prediction_probability"": 1.0, ""throughput_mbps"": 2.792, ""throughput_to_bitrate_ratio"": 0.4653, ""trust_level"": ""high"", ""trust_score"": 0.958}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation poor-QoE forecast. Do not claim that degradation has already occurred or that its onset time is known.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": -3.208,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 53.467,
+  ""prediction"": ""future_poor_qoe"",
+  ""prediction_probability"": 1.0,
+  ""throughput_mbps"": 2.792,
+  ""throughput_to_bitrate_ratio"": 0.4653,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.958
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_poor_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts poor QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is below the configured bitrate demand, producing a negative capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The packet-loss evidence is elevated and is consistent with impaired delivery.""}, {""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS indicates poor service quality at the present observation.""}], ""limitations"": ""The evidence supports the forecast but does not identify a unique underlying network fault or establish when conditions may change."", ""prediction"": ""future_poor_qoe"", ""recommended_operator_checks"": [""Verify throughput delivery against the configured bitrate and inspect the packet-loss measurement."", ""Confirm the current MOS measurement and check whether the same conditions persist in later observations.""], ""summary"": ""The model forecasts poor QoE at the next observation, and the supplied operational evidence is consistent with that forecast.""}",[],Ahmed,1,1,0,0,OK
+case_006,future_poor_qoe,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": -5.592, ""current_mos"": 1.0, ""plr_percent"": 69.9, ""prediction"": ""future_poor_qoe"", ""prediction_probability"": 1.0, ""throughput_mbps"": 2.408, ""throughput_to_bitrate_ratio"": 0.301, ""trust_level"": ""high"", ""trust_score"": 0.958}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation poor-QoE forecast. Do not claim that degradation has already occurred or that its onset time is known.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": -5.592,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 69.9,
+  ""prediction"": ""future_poor_qoe"",
+  ""prediction_probability"": 1.0,
+  ""throughput_mbps"": 2.408,
+  ""throughput_to_bitrate_ratio"": 0.301,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.958
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_poor_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts poor QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is below the configured bitrate demand, producing a negative capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The packet-loss evidence is elevated and is consistent with impaired delivery.""}, {""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS indicates poor service quality at the present observation.""}], ""limitations"": ""The evidence supports the forecast but does not identify a unique underlying network fault or establish when conditions may change."", ""prediction"": ""future_poor_qoe"", ""recommended_operator_checks"": [""Verify throughput delivery against the configured bitrate and inspect the packet-loss measurement."", ""Confirm the current MOS measurement and check whether the same conditions persist in later observations.""], ""summary"": ""The model forecasts poor QoE at the next observation, and the supplied operational evidence is consistent with that forecast.""}",[],Ahmed,1,1,0,0,OK
+case_007,future_poor_qoe,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": -4.76, ""current_mos"": 1.0, ""plr_percent"": 59.5, ""prediction"": ""future_poor_qoe"", ""prediction_probability"": 0.9947, ""throughput_mbps"": 3.24, ""throughput_to_bitrate_ratio"": 0.405, ""trust_level"": ""high"", ""trust_score"": 0.9546}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation poor-QoE forecast. Do not claim that degradation has already occurred or that its onset time is known.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": -4.76,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 59.5,
+  ""prediction"": ""future_poor_qoe"",
+  ""prediction_probability"": 0.9947,
+  ""throughput_mbps"": 3.24,
+  ""throughput_to_bitrate_ratio"": 0.405,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.9546
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_poor_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts poor QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is below the configured bitrate demand, producing a negative capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The packet-loss evidence is elevated and is consistent with impaired delivery.""}, {""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS indicates poor service quality at the present observation.""}], ""limitations"": ""The evidence supports the forecast but does not identify a unique underlying network fault or establish when conditions may change."", ""prediction"": ""future_poor_qoe"", ""recommended_operator_checks"": [""Verify throughput delivery against the configured bitrate and inspect the packet-loss measurement."", ""Confirm the current MOS measurement and check whether the same conditions persist in later observations.""], ""summary"": ""The model forecasts poor QoE at the next observation, and the supplied operational evidence is consistent with that forecast.""}",[],Ahmed,1,1,0,0,OK
+case_008,future_poor_qoe,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": -3.024, ""current_mos"": 1.0, ""plr_percent"": 50.4, ""prediction"": ""future_poor_qoe"", ""prediction_probability"": 0.6996, ""throughput_mbps"": 2.976, ""throughput_to_bitrate_ratio"": 0.496, ""trust_level"": ""medium"", ""trust_score"": 0.7158}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation poor-QoE forecast. Do not claim that degradation has already occurred or that its onset time is known.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": -3.024,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 50.4,
+  ""prediction"": ""future_poor_qoe"",
+  ""prediction_probability"": 0.6996,
+  ""throughput_mbps"": 2.976,
+  ""throughput_to_bitrate_ratio"": 0.496,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.7158
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_poor_qoe"",
+  ""confidence"": ""medium"",
+  ""summary"": ""The model forecasts poor QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""medium"", ""likely_causes"": [{""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is below the configured bitrate demand, producing a negative capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The packet-loss evidence is elevated and is consistent with impaired delivery.""}, {""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS indicates poor service quality at the present observation.""}], ""limitations"": ""The evidence supports the forecast but does not identify a unique underlying network fault or establish when conditions may change."", ""prediction"": ""future_poor_qoe"", ""recommended_operator_checks"": [""Verify throughput delivery against the configured bitrate and inspect the packet-loss measurement."", ""Confirm the current MOS measurement and check whether the same conditions persist in later observations.""], ""summary"": ""The model forecasts poor QoE at the next observation, and the supplied operational evidence is consistent with that forecast.""}",[],Ahmed,1,1,0,0,OK
+case_009,future_poor_qoe,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": -2.76, ""current_mos"": 1.0, ""plr_percent"": 46.0, ""prediction"": ""future_poor_qoe"", ""prediction_probability"": 1.0, ""throughput_mbps"": 3.24, ""throughput_to_bitrate_ratio"": 0.54, ""trust_level"": ""high"", ""trust_score"": 0.958}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation poor-QoE forecast. Do not claim that degradation has already occurred or that its onset time is known.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": -2.76,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 46.0,
+  ""prediction"": ""future_poor_qoe"",
+  ""prediction_probability"": 1.0,
+  ""throughput_mbps"": 3.24,
+  ""throughput_to_bitrate_ratio"": 0.54,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.958
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_poor_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts poor QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is below the configured bitrate demand, producing a negative capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The packet-loss evidence is elevated and is consistent with impaired delivery.""}, {""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS indicates poor service quality at the present observation.""}], ""limitations"": ""The evidence supports the forecast but does not identify a unique underlying network fault or establish when conditions may change."", ""prediction"": ""future_poor_qoe"", ""recommended_operator_checks"": [""Verify throughput delivery against the configured bitrate and inspect the packet-loss measurement."", ""Confirm the current MOS measurement and check whether the same conditions persist in later observations.""], ""summary"": ""The model forecasts poor QoE at the next observation, and the supplied operational evidence is consistent with that forecast.""}",[],Ahmed,1,1,0,0,OK
+case_010,future_poor_qoe,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": -8.0, ""current_mos"": 1.0, ""plr_percent"": 100.0, ""prediction"": ""future_poor_qoe"", ""prediction_probability"": 0.9392, ""throughput_mbps"": 0.0, ""throughput_to_bitrate_ratio"": 0.0, ""trust_level"": ""high"", ""trust_score"": 0.9194}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation poor-QoE forecast. Do not claim that degradation has already occurred or that its onset time is known.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": -8.0,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 100.0,
+  ""prediction"": ""future_poor_qoe"",
+  ""prediction_probability"": 0.9392,
+  ""throughput_mbps"": 0.0,
+  ""throughput_to_bitrate_ratio"": 0.0,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.9194
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_poor_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts poor QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""No delivered throughput is observed while a bitrate demand is configured, leaving a negative capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The packet-loss evidence is elevated and is consistent with impaired delivery.""}, {""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS indicates poor service quality at the present observation.""}], ""limitations"": ""The evidence supports the forecast but does not identify a unique underlying network fault or establish when conditions may change."", ""prediction"": ""future_poor_qoe"", ""recommended_operator_checks"": [""Verify throughput delivery against the configured bitrate and inspect the packet-loss measurement."", ""Confirm the current MOS measurement and check whether the same conditions persist in later observations.""], ""summary"": ""The model forecasts poor QoE at the next observation, and the supplied operational evidence is consistent with that forecast.""}",[],Ahmed,1,1,0,0,OK
+case_011,future_acceptable_qoe,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": 11.968, ""current_mos"": 4.834, ""plr_percent"": 0.0, ""prediction"": ""future_acceptable_qoe"", ""prediction_probability"": 0.0611, ""throughput_mbps"": 19.968, ""throughput_to_bitrate_ratio"": 2.496, ""trust_level"": ""high"", ""trust_score"": 0.892}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation acceptable-QoE forecast. Do not describe this decision as a degradation or poor-QoE forecast.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": 11.968,
+  ""current_mos"": 4.834,
+  ""plr_percent"": 0.0,
+  ""prediction"": ""future_acceptable_qoe"",
+  ""prediction_probability"": 0.0611,
+  ""throughput_mbps"": 19.968,
+  ""throughput_to_bitrate_ratio"": 2.496,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.892
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_acceptable_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts acceptable QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS is consistent with acceptable service quality at the present observation.""}, {""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput exceeds the configured bitrate demand, leaving a positive capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""No packet loss is observed in the supplied evidence.""}], ""limitations"": ""The evidence is limited to current measurements and cannot guarantee conditions at the next observation."", ""prediction"": ""future_acceptable_qoe"", ""recommended_operator_checks"": [""Continue monitoring throughput relative to bitrate and verify the packet-loss measurement."", ""Confirm that the current MOS remains consistent with acceptable service quality.""], ""summary"": ""The model forecasts acceptable QoE at the next observation, supported by the supplied current service indicators.""}",[],Ahmed,1,1,0,0,OK
+case_012,future_acceptable_qoe,"{""bitrate_kbps"": 4000, ""capacity_margin_mbps"": -0.248, ""current_mos"": 3.381, ""plr_percent"": 6.2, ""prediction"": ""future_acceptable_qoe"", ""prediction_probability"": 0.1153, ""throughput_mbps"": 3.752, ""throughput_to_bitrate_ratio"": 0.938, ""trust_level"": ""high"", ""trust_score"": 0.8334}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation acceptable-QoE forecast. Do not describe this decision as a degradation or poor-QoE forecast.
+
+Evidence:
+{
+  ""bitrate_kbps"": 4000,
+  ""capacity_margin_mbps"": -0.248,
+  ""current_mos"": 3.381,
+  ""plr_percent"": 6.2,
+  ""prediction"": ""future_acceptable_qoe"",
+  ""prediction_probability"": 0.1153,
+  ""throughput_mbps"": 3.752,
+  ""throughput_to_bitrate_ratio"": 0.938,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.8334
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_acceptable_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts acceptable QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS is consistent with acceptable service quality at the present observation.""}, {""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is close to the configured bitrate demand despite limited capacity headroom.""}], ""limitations"": ""Limited capacity headroom and the observed packet loss warrant continued monitoring; current evidence cannot guarantee the next observation."", ""prediction"": ""future_acceptable_qoe"", ""recommended_operator_checks"": [""Continue monitoring throughput relative to bitrate and verify the packet-loss measurement."", ""Confirm that the current MOS remains consistent with acceptable service quality.""], ""summary"": ""The model forecasts acceptable QoE at the next observation, supported by the supplied current service indicators.""}",[],Ahmed,1,1,0,0,OK
+case_013,future_acceptable_qoe,"{""bitrate_kbps"": 4000, ""capacity_margin_mbps"": -0.032, ""current_mos"": 4.616, ""plr_percent"": 0.8, ""prediction"": ""future_acceptable_qoe"", ""prediction_probability"": 0.168, ""throughput_mbps"": 3.968, ""throughput_to_bitrate_ratio"": 0.992, ""trust_level"": ""medium"", ""trust_score"": 0.7764}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation acceptable-QoE forecast. Do not describe this decision as a degradation or poor-QoE forecast.
+
+Evidence:
+{
+  ""bitrate_kbps"": 4000,
+  ""capacity_margin_mbps"": -0.032,
+  ""current_mos"": 4.616,
+  ""plr_percent"": 0.8,
+  ""prediction"": ""future_acceptable_qoe"",
+  ""prediction_probability"": 0.168,
+  ""throughput_mbps"": 3.968,
+  ""throughput_to_bitrate_ratio"": 0.992,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.7764
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_acceptable_qoe"",
+  ""confidence"": ""medium"",
+  ""summary"": ""The model forecasts acceptable QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""medium"", ""likely_causes"": [{""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS is consistent with acceptable service quality at the present observation.""}, {""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is close to the configured bitrate demand despite limited capacity headroom.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The supplied packet-loss measurement is limited.""}], ""limitations"": ""Limited capacity headroom and the observed packet loss warrant continued monitoring; current evidence cannot guarantee the next observation."", ""prediction"": ""future_acceptable_qoe"", ""recommended_operator_checks"": [""Continue monitoring throughput relative to bitrate and verify the packet-loss measurement."", ""Confirm that the current MOS remains consistent with acceptable service quality.""], ""summary"": ""The model forecasts acceptable QoE at the next observation, supported by the supplied current service indicators.""}",[],Ahmed,1,1,0,0,OK
+case_014,future_acceptable_qoe,"{""bitrate_kbps"": 4000, ""capacity_margin_mbps"": -0.032, ""current_mos"": 4.616, ""plr_percent"": 0.8, ""prediction"": ""future_acceptable_qoe"", ""prediction_probability"": 0.1318, ""throughput_mbps"": 3.968, ""throughput_to_bitrate_ratio"": 0.992, ""trust_level"": ""high"", ""trust_score"": 0.8155}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation acceptable-QoE forecast. Do not describe this decision as a degradation or poor-QoE forecast.
+
+Evidence:
+{
+  ""bitrate_kbps"": 4000,
+  ""capacity_margin_mbps"": -0.032,
+  ""current_mos"": 4.616,
+  ""plr_percent"": 0.8,
+  ""prediction"": ""future_acceptable_qoe"",
+  ""prediction_probability"": 0.1318,
+  ""throughput_mbps"": 3.968,
+  ""throughput_to_bitrate_ratio"": 0.992,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.8155
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_acceptable_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts acceptable QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS is consistent with acceptable service quality at the present observation.""}, {""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is close to the configured bitrate demand despite limited capacity headroom.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""The supplied packet-loss measurement is limited.""}], ""limitations"": ""Limited capacity headroom and the observed packet loss warrant continued monitoring; current evidence cannot guarantee the next observation."", ""prediction"": ""future_acceptable_qoe"", ""recommended_operator_checks"": [""Continue monitoring throughput relative to bitrate and verify the packet-loss measurement."", ""Confirm that the current MOS remains consistent with acceptable service quality.""], ""summary"": ""The model forecasts acceptable QoE at the next observation, supported by the supplied current service indicators.""}",[],Ahmed,1,1,0,0,OK
+case_015,future_acceptable_qoe,"{""bitrate_kbps"": 4000, ""capacity_margin_mbps"": -0.248, ""current_mos"": 3.381, ""plr_percent"": 6.2, ""prediction"": ""future_acceptable_qoe"", ""prediction_probability"": 0.0889, ""throughput_mbps"": 3.752, ""throughput_to_bitrate_ratio"": 0.938, ""trust_level"": ""high"", ""trust_score"": 0.8618}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation acceptable-QoE forecast. Do not describe this decision as a degradation or poor-QoE forecast.
+
+Evidence:
+{
+  ""bitrate_kbps"": 4000,
+  ""capacity_margin_mbps"": -0.248,
+  ""current_mos"": 3.381,
+  ""plr_percent"": 6.2,
+  ""prediction"": ""future_acceptable_qoe"",
+  ""prediction_probability"": 0.0889,
+  ""throughput_mbps"": 3.752,
+  ""throughput_to_bitrate_ratio"": 0.938,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.8618
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_acceptable_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts acceptable QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS is consistent with acceptable service quality at the present observation.""}, {""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput is close to the configured bitrate demand despite limited capacity headroom.""}], ""limitations"": ""Limited capacity headroom and the observed packet loss warrant continued monitoring; current evidence cannot guarantee the next observation."", ""prediction"": ""future_acceptable_qoe"", ""recommended_operator_checks"": [""Continue monitoring throughput relative to bitrate and verify the packet-loss measurement."", ""Confirm that the current MOS remains consistent with acceptable service quality.""], ""summary"": ""The model forecasts acceptable QoE at the next observation, supported by the supplied current service indicators.""}",[],Ahmed,1,1,0,0,OK
+case_016,future_acceptable_qoe,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": 8.344, ""current_mos"": 4.834, ""plr_percent"": 0.0, ""prediction"": ""future_acceptable_qoe"", ""prediction_probability"": 0.0042, ""throughput_mbps"": 14.344, ""throughput_to_bitrate_ratio"": 2.3907, ""trust_level"": ""high"", ""trust_score"": 0.9535}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation acceptable-QoE forecast. Do not describe this decision as a degradation or poor-QoE forecast.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": 8.344,
+  ""current_mos"": 4.834,
+  ""plr_percent"": 0.0,
+  ""prediction"": ""future_acceptable_qoe"",
+  ""prediction_probability"": 0.0042,
+  ""throughput_mbps"": 14.344,
+  ""throughput_to_bitrate_ratio"": 2.3907,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.9535
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_acceptable_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts acceptable QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS is consistent with acceptable service quality at the present observation.""}, {""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput exceeds the configured bitrate demand, leaving a positive capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""No packet loss is observed in the supplied evidence.""}], ""limitations"": ""The evidence is limited to current measurements and cannot guarantee conditions at the next observation."", ""prediction"": ""future_acceptable_qoe"", ""recommended_operator_checks"": [""Continue monitoring throughput relative to bitrate and verify the packet-loss measurement."", ""Confirm that the current MOS remains consistent with acceptable service quality.""], ""summary"": ""The model forecasts acceptable QoE at the next observation, supported by the supplied current service indicators.""}",[],Ahmed,1,1,0,0,OK
+case_017,future_acceptable_qoe,"{""bitrate_kbps"": 4000, ""capacity_margin_mbps"": 27.752, ""current_mos"": 4.834, ""plr_percent"": 0.0, ""prediction"": ""future_acceptable_qoe"", ""prediction_probability"": 0.0076, ""throughput_mbps"": 31.752, ""throughput_to_bitrate_ratio"": 7.938, ""trust_level"": ""high"", ""trust_score"": 0.9498}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation acceptable-QoE forecast. Do not describe this decision as a degradation or poor-QoE forecast.
+
+Evidence:
+{
+  ""bitrate_kbps"": 4000,
+  ""capacity_margin_mbps"": 27.752,
+  ""current_mos"": 4.834,
+  ""plr_percent"": 0.0,
+  ""prediction"": ""future_acceptable_qoe"",
+  ""prediction_probability"": 0.0076,
+  ""throughput_mbps"": 31.752,
+  ""throughput_to_bitrate_ratio"": 7.938,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.9498
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_acceptable_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts acceptable QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS is consistent with acceptable service quality at the present observation.""}, {""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput exceeds the configured bitrate demand, leaving a positive capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""No packet loss is observed in the supplied evidence.""}], ""limitations"": ""The evidence is limited to current measurements and cannot guarantee conditions at the next observation."", ""prediction"": ""future_acceptable_qoe"", ""recommended_operator_checks"": [""Continue monitoring throughput relative to bitrate and verify the packet-loss measurement."", ""Confirm that the current MOS remains consistent with acceptable service quality.""], ""summary"": ""The model forecasts acceptable QoE at the next observation, supported by the supplied current service indicators.""}",[],Ahmed,1,1,0,0,OK
+case_018,future_acceptable_qoe,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": 25.752, ""current_mos"": 4.834, ""plr_percent"": 0.0, ""prediction"": ""future_acceptable_qoe"", ""prediction_probability"": 0.0192, ""throughput_mbps"": 31.752, ""throughput_to_bitrate_ratio"": 5.292, ""trust_level"": ""high"", ""trust_score"": 0.9372}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation acceptable-QoE forecast. Do not describe this decision as a degradation or poor-QoE forecast.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": 25.752,
+  ""current_mos"": 4.834,
+  ""plr_percent"": 0.0,
+  ""prediction"": ""future_acceptable_qoe"",
+  ""prediction_probability"": 0.0192,
+  ""throughput_mbps"": 31.752,
+  ""throughput_to_bitrate_ratio"": 5.292,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.9372
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_acceptable_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts acceptable QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS is consistent with acceptable service quality at the present observation.""}, {""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput exceeds the configured bitrate demand, leaving a positive capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""No packet loss is observed in the supplied evidence.""}], ""limitations"": ""The evidence is limited to current measurements and cannot guarantee conditions at the next observation."", ""prediction"": ""future_acceptable_qoe"", ""recommended_operator_checks"": [""Continue monitoring throughput relative to bitrate and verify the packet-loss measurement."", ""Confirm that the current MOS remains consistent with acceptable service quality.""], ""summary"": ""The model forecasts acceptable QoE at the next observation, supported by the supplied current service indicators.""}",[],Ahmed,1,1,0,0,OK
+case_019,future_acceptable_qoe,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": 18.12, ""current_mos"": 4.834, ""plr_percent"": 0.0, ""prediction"": ""future_acceptable_qoe"", ""prediction_probability"": 0.1281, ""throughput_mbps"": 26.12, ""throughput_to_bitrate_ratio"": 3.265, ""trust_level"": ""high"", ""trust_score"": 0.8195}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation acceptable-QoE forecast. Do not describe this decision as a degradation or poor-QoE forecast.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": 18.12,
+  ""current_mos"": 4.834,
+  ""plr_percent"": 0.0,
+  ""prediction"": ""future_acceptable_qoe"",
+  ""prediction_probability"": 0.1281,
+  ""throughput_mbps"": 26.12,
+  ""throughput_to_bitrate_ratio"": 3.265,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.8195
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_acceptable_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts acceptable QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS is consistent with acceptable service quality at the present observation.""}, {""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput exceeds the configured bitrate demand, leaving a positive capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""No packet loss is observed in the supplied evidence.""}], ""limitations"": ""The evidence is limited to current measurements and cannot guarantee conditions at the next observation."", ""prediction"": ""future_acceptable_qoe"", ""recommended_operator_checks"": [""Continue monitoring throughput relative to bitrate and verify the packet-loss measurement."", ""Confirm that the current MOS remains consistent with acceptable service quality.""], ""summary"": ""The model forecasts acceptable QoE at the next observation, supported by the supplied current service indicators.""}",[],Ahmed,1,1,0,0,OK
+case_020,future_acceptable_qoe,"{""bitrate_kbps"": 2000, ""capacity_margin_mbps"": 1.968, ""current_mos"": 4.834, ""plr_percent"": 0.0, ""prediction"": ""future_acceptable_qoe"", ""prediction_probability"": 0.0889, ""throughput_mbps"": 3.968, ""throughput_to_bitrate_ratio"": 1.984, ""trust_level"": ""high"", ""trust_score"": 0.8618}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain the model's next-observation acceptable-QoE forecast. Do not describe this decision as a degradation or poor-QoE forecast.
+
+Evidence:
+{
+  ""bitrate_kbps"": 2000,
+  ""capacity_margin_mbps"": 1.968,
+  ""current_mos"": 4.834,
+  ""plr_percent"": 0.0,
+  ""prediction"": ""future_acceptable_qoe"",
+  ""prediction_probability"": 0.0889,
+  ""throughput_mbps"": 3.968,
+  ""throughput_to_bitrate_ratio"": 1.984,
+  ""trust_level"": ""high"",
+  ""trust_score"": 0.8618
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""future_acceptable_qoe"",
+  ""confidence"": ""high"",
+  ""summary"": ""The model forecasts acceptable QoE at the next observation."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""high"", ""likely_causes"": [{""evidence_keys"": [""current_mos""], ""statement"": ""The current MOS is consistent with acceptable service quality at the present observation.""}, {""evidence_keys"": [""throughput_mbps"", ""bitrate_kbps"", ""throughput_to_bitrate_ratio"", ""capacity_margin_mbps""], ""statement"": ""Delivered throughput exceeds the configured bitrate demand, leaving a positive capacity margin.""}, {""evidence_keys"": [""plr_percent""], ""statement"": ""No packet loss is observed in the supplied evidence.""}], ""limitations"": ""The evidence is limited to current measurements and cannot guarantee conditions at the next observation."", ""prediction"": ""future_acceptable_qoe"", ""recommended_operator_checks"": [""Continue monitoring throughput relative to bitrate and verify the packet-loss measurement."", ""Confirm that the current MOS remains consistent with acceptable service quality.""], ""summary"": ""The model forecasts acceptable QoE at the next observation, supported by the supplied current service indicators.""}",[],Ahmed,1,1,0,0,OK
+case_021,abstain,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": 1.936, ""current_mos"": 4.834, ""plr_percent"": 0.0, ""prediction"": ""abstain"", ""prediction_probability"": 0.3222, ""throughput_mbps"": 7.936, ""throughput_to_bitrate_ratio"": 1.3227, ""trust_level"": ""medium"", ""trust_score"": 0.6096}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain why the system withheld a prediction. Set confidence to low and likely_causes to an empty list; do not present a confident causal diagnosis.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": 1.936,
+  ""current_mos"": 4.834,
+  ""plr_percent"": 0.0,
+  ""prediction"": ""abstain"",
+  ""prediction_probability"": 0.3222,
+  ""throughput_mbps"": 7.936,
+  ""throughput_to_bitrate_ratio"": 1.3227,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.6096
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""abstain"",
+  ""confidence"": ""low"",
+  ""summary"": ""The system abstains because reliability is insufficient."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""low"", ""likely_causes"": [], ""limitations"": ""There is insufficient evidence to support a specific cause or to choose between poor and acceptable QoE."", ""prediction"": ""abstain"", ""recommended_operator_checks"": [""Continue monitoring current MOS, packet loss, and throughput relative to the configured bitrate."", ""Collect another observation before making an operational decision.""], ""summary"": ""The system withholds a next-observation QoE classification because the reliability evidence is insufficient for a committed prediction.""}",[],Ahmed,1,1,0,0,OK
+case_022,abstain,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": -6.0, ""current_mos"": 1.0, ""plr_percent"": 100.0, ""prediction"": ""abstain"", ""prediction_probability"": 0.2744, ""throughput_mbps"": 0.0, ""throughput_to_bitrate_ratio"": 0.0, ""trust_level"": ""medium"", ""trust_score"": 0.6613}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain why the system withheld a prediction. Set confidence to low and likely_causes to an empty list; do not present a confident causal diagnosis.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": -6.0,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 100.0,
+  ""prediction"": ""abstain"",
+  ""prediction_probability"": 0.2744,
+  ""throughput_mbps"": 0.0,
+  ""throughput_to_bitrate_ratio"": 0.0,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.6613
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""abstain"",
+  ""confidence"": ""low"",
+  ""summary"": ""The system abstains because reliability is insufficient."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""low"", ""likely_causes"": [], ""limitations"": ""There is insufficient evidence to support a specific cause or to choose between poor and acceptable QoE."", ""prediction"": ""abstain"", ""recommended_operator_checks"": [""Verify the throughput and packet-loss measurements before taking operational action."", ""Collect another observation and review whether the current MOS and delivery conditions persist.""], ""summary"": ""The system withholds a next-observation QoE classification because the reliability evidence is insufficient for a committed prediction.""}",[],Ahmed,1,1,0,0,OK
+case_023,abstain,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": -6.0, ""current_mos"": 1.0, ""plr_percent"": 100.0, ""prediction"": ""abstain"", ""prediction_probability"": 0.3135, ""throughput_mbps"": 0.0, ""throughput_to_bitrate_ratio"": 0.0, ""trust_level"": ""medium"", ""trust_score"": 0.619}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain why the system withheld a prediction. Set confidence to low and likely_causes to an empty list; do not present a confident causal diagnosis.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": -6.0,
+  ""current_mos"": 1.0,
+  ""plr_percent"": 100.0,
+  ""prediction"": ""abstain"",
+  ""prediction_probability"": 0.3135,
+  ""throughput_mbps"": 0.0,
+  ""throughput_to_bitrate_ratio"": 0.0,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.619
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""abstain"",
+  ""confidence"": ""low"",
+  ""summary"": ""The system abstains because reliability is insufficient."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""low"", ""likely_causes"": [], ""limitations"": ""There is insufficient evidence to support a specific cause or to choose between poor and acceptable QoE."", ""prediction"": ""abstain"", ""recommended_operator_checks"": [""Verify the throughput and packet-loss measurements before taking operational action."", ""Collect another observation and review whether the current MOS and delivery conditions persist.""], ""summary"": ""The system withholds a next-observation QoE classification because the reliability evidence is insufficient for a committed prediction.""}",[],Ahmed,1,1,0,0,OK
+case_024,abstain,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": -1.088, ""current_mos"": 2.206, ""plr_percent"": 13.6, ""prediction"": ""abstain"", ""prediction_probability"": 0.3722, ""throughput_mbps"": 6.912, ""throughput_to_bitrate_ratio"": 0.864, ""trust_level"": ""low"", ""trust_score"": 0.5078}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain why the system withheld a prediction. Set confidence to low and likely_causes to an empty list; do not present a confident causal diagnosis.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": -1.088,
+  ""current_mos"": 2.206,
+  ""plr_percent"": 13.6,
+  ""prediction"": ""abstain"",
+  ""prediction_probability"": 0.3722,
+  ""throughput_mbps"": 6.912,
+  ""throughput_to_bitrate_ratio"": 0.864,
+  ""trust_level"": ""low"",
+  ""trust_score"": 0.5078
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""abstain"",
+  ""confidence"": ""low"",
+  ""summary"": ""The system abstains because reliability is insufficient."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""low"", ""likely_causes"": [], ""limitations"": ""There is insufficient evidence to support a specific cause or to choose between poor and acceptable QoE."", ""prediction"": ""abstain"", ""recommended_operator_checks"": [""Review the current MOS, packet loss, and throughput relative to the configured bitrate before acting."", ""Collect another observation to determine whether the mixed indicators persist.""], ""summary"": ""The system withholds a next-observation QoE classification because the reliability evidence is insufficient for a committed prediction.""}",[],Ahmed,1,1,0,0,OK
+case_025,abstain,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": -2.112, ""current_mos"": 1.055, ""plr_percent"": 26.4, ""prediction"": ""abstain"", ""prediction_probability"": 0.5257, ""throughput_mbps"": 5.888, ""throughput_to_bitrate_ratio"": 0.736, ""trust_level"": ""medium"", ""trust_score"": 0.6568}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain why the system withheld a prediction. Set confidence to low and likely_causes to an empty list; do not present a confident causal diagnosis.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": -2.112,
+  ""current_mos"": 1.055,
+  ""plr_percent"": 26.4,
+  ""prediction"": ""abstain"",
+  ""prediction_probability"": 0.5257,
+  ""throughput_mbps"": 5.888,
+  ""throughput_to_bitrate_ratio"": 0.736,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.6568
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""abstain"",
+  ""confidence"": ""low"",
+  ""summary"": ""The system abstains because reliability is insufficient."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""low"", ""likely_causes"": [], ""limitations"": ""There is insufficient evidence to support a specific cause or to choose between poor and acceptable QoE."", ""prediction"": ""abstain"", ""recommended_operator_checks"": [""Review the current MOS, packet loss, and throughput relative to the configured bitrate before acting."", ""Collect another observation to determine whether the mixed indicators persist.""], ""summary"": ""The system withholds a next-observation QoE classification because the reliability evidence is insufficient for a committed prediction.""}",[],Ahmed,1,1,0,0,OK
+case_026,abstain,"{""bitrate_kbps"": 4000, ""capacity_margin_mbps"": -0.504, ""current_mos"": 2.337, ""plr_percent"": 12.6, ""prediction"": ""abstain"", ""prediction_probability"": 0.2935, ""throughput_mbps"": 3.496, ""throughput_to_bitrate_ratio"": 0.874, ""trust_level"": ""medium"", ""trust_score"": 0.6407}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain why the system withheld a prediction. Set confidence to low and likely_causes to an empty list; do not present a confident causal diagnosis.
+
+Evidence:
+{
+  ""bitrate_kbps"": 4000,
+  ""capacity_margin_mbps"": -0.504,
+  ""current_mos"": 2.337,
+  ""plr_percent"": 12.6,
+  ""prediction"": ""abstain"",
+  ""prediction_probability"": 0.2935,
+  ""throughput_mbps"": 3.496,
+  ""throughput_to_bitrate_ratio"": 0.874,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.6407
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""abstain"",
+  ""confidence"": ""low"",
+  ""summary"": ""The system abstains because reliability is insufficient."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""low"", ""likely_causes"": [], ""limitations"": ""There is insufficient evidence to support a specific cause or to choose between poor and acceptable QoE."", ""prediction"": ""abstain"", ""recommended_operator_checks"": [""Review the current MOS, packet loss, and throughput relative to the configured bitrate before acting."", ""Collect another observation to determine whether the mixed indicators persist.""], ""summary"": ""The system withholds a next-observation QoE classification because the reliability evidence is insufficient for a committed prediction.""}",[],Ahmed,1,1,0,0,OK
+case_027,abstain,"{""bitrate_kbps"": 8000, ""capacity_margin_mbps"": 5.064, ""current_mos"": 4.834, ""plr_percent"": 0.0, ""prediction"": ""abstain"", ""prediction_probability"": 0.4, ""throughput_mbps"": 13.064, ""throughput_to_bitrate_ratio"": 1.633, ""trust_level"": ""medium"", ""trust_score"": 0.577}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain why the system withheld a prediction. Set confidence to low and likely_causes to an empty list; do not present a confident causal diagnosis.
+
+Evidence:
+{
+  ""bitrate_kbps"": 8000,
+  ""capacity_margin_mbps"": 5.064,
+  ""current_mos"": 4.834,
+  ""plr_percent"": 0.0,
+  ""prediction"": ""abstain"",
+  ""prediction_probability"": 0.4,
+  ""throughput_mbps"": 13.064,
+  ""throughput_to_bitrate_ratio"": 1.633,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.577
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""abstain"",
+  ""confidence"": ""low"",
+  ""summary"": ""The system abstains because reliability is insufficient."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""low"", ""likely_causes"": [], ""limitations"": ""There is insufficient evidence to support a specific cause or to choose between poor and acceptable QoE."", ""prediction"": ""abstain"", ""recommended_operator_checks"": [""Continue monitoring current MOS, packet loss, and throughput relative to the configured bitrate."", ""Collect another observation before making an operational decision.""], ""summary"": ""The system withholds a next-observation QoE classification because the reliability evidence is insufficient for a committed prediction.""}",[],Ahmed,1,1,0,0,OK
+case_028,abstain,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": 2.192, ""current_mos"": 4.834, ""plr_percent"": 0.0, ""prediction"": ""abstain"", ""prediction_probability"": 0.302, ""throughput_mbps"": 8.192, ""throughput_to_bitrate_ratio"": 1.3653, ""trust_level"": ""medium"", ""trust_score"": 0.6314}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain why the system withheld a prediction. Set confidence to low and likely_causes to an empty list; do not present a confident causal diagnosis.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": 2.192,
+  ""current_mos"": 4.834,
+  ""plr_percent"": 0.0,
+  ""prediction"": ""abstain"",
+  ""prediction_probability"": 0.302,
+  ""throughput_mbps"": 8.192,
+  ""throughput_to_bitrate_ratio"": 1.3653,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.6314
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""abstain"",
+  ""confidence"": ""low"",
+  ""summary"": ""The system abstains because reliability is insufficient."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""low"", ""likely_causes"": [], ""limitations"": ""There is insufficient evidence to support a specific cause or to choose between poor and acceptable QoE."", ""prediction"": ""abstain"", ""recommended_operator_checks"": [""Continue monitoring current MOS, packet loss, and throughput relative to the configured bitrate."", ""Collect another observation before making an operational decision.""], ""summary"": ""The system withholds a next-observation QoE classification because the reliability evidence is insufficient for a committed prediction.""}",[],Ahmed,1,1,0,0,OK
+case_029,abstain,"{""bitrate_kbps"": 6000, ""capacity_margin_mbps"": 2.192, ""current_mos"": 4.834, ""plr_percent"": 0.0, ""prediction"": ""abstain"", ""prediction_probability"": 0.2935, ""throughput_mbps"": 8.192, ""throughput_to_bitrate_ratio"": 1.3653, ""trust_level"": ""medium"", ""trust_score"": 0.6407}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain why the system withheld a prediction. Set confidence to low and likely_causes to an empty list; do not present a confident causal diagnosis.
+
+Evidence:
+{
+  ""bitrate_kbps"": 6000,
+  ""capacity_margin_mbps"": 2.192,
+  ""current_mos"": 4.834,
+  ""plr_percent"": 0.0,
+  ""prediction"": ""abstain"",
+  ""prediction_probability"": 0.2935,
+  ""throughput_mbps"": 8.192,
+  ""throughput_to_bitrate_ratio"": 1.3653,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.6407
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""abstain"",
+  ""confidence"": ""low"",
+  ""summary"": ""The system abstains because reliability is insufficient."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""low"", ""likely_causes"": [], ""limitations"": ""There is insufficient evidence to support a specific cause or to choose between poor and acceptable QoE."", ""prediction"": ""abstain"", ""recommended_operator_checks"": [""Continue monitoring current MOS, packet loss, and throughput relative to the configured bitrate."", ""Collect another observation before making an operational decision.""], ""summary"": ""The system withholds a next-observation QoE classification because the reliability evidence is insufficient for a committed prediction.""}",[],Ahmed,1,1,0,0,OK
+case_030,abstain,"{""bitrate_kbps"": 4000, ""capacity_margin_mbps"": -0.76, ""current_mos"": 1.616, ""plr_percent"": 19.0, ""prediction"": ""abstain"", ""prediction_probability"": 0.302, ""throughput_mbps"": 3.24, ""throughput_to_bitrate_ratio"": 0.81, ""trust_level"": ""medium"", ""trust_score"": 0.6314}","You are a senior 5G network engineer.
+
+Rules:
+- Use only the supplied evidence.
+- prediction_probability is the calibrated probability of poor QoE at the next
+  observation. It is not an observed outcome.
+- trust_score is a heuristic reliability score, not a probability of correctness.
+- Never invent numbers, fields, units, causes, future measurements, or timing.
+- Every likely cause must cite one or more exact evidence keys in evidence_keys.
+- Optional supported-cause item shape: {statement, evidence_keys}.
+- For a non-abstained decision, confidence must equal the supplied trust_level.
+- If the evidence supports no cause, use an empty likely_causes list and write
+  ""insufficient evidence"" in the summary or limitations.
+- Return only valid JSON.
+
+Decision-specific task:
+Explain why the system withheld a prediction. Set confidence to low and likely_causes to an empty list; do not present a confident causal diagnosis.
+
+Evidence:
+{
+  ""bitrate_kbps"": 4000,
+  ""capacity_margin_mbps"": -0.76,
+  ""current_mos"": 1.616,
+  ""plr_percent"": 19.0,
+  ""prediction"": ""abstain"",
+  ""prediction_probability"": 0.302,
+  ""throughput_mbps"": 3.24,
+  ""throughput_to_bitrate_ratio"": 0.81,
+  ""trust_level"": ""medium"",
+  ""trust_score"": 0.6314
+}
+
+Return ONLY this JSON schema:
+
+{
+  ""prediction"": ""abstain"",
+  ""confidence"": ""low"",
+  ""summary"": ""The system abstains because reliability is insufficient."",
+  ""likely_causes"": [],
+  ""recommended_operator_checks"": [""Review the cited operational evidence.""],
+  ""limitations"": ""Insufficient evidence supports a specific cause.""
+}
+","{""confidence"": ""low"", ""likely_causes"": [], ""limitations"": ""There is insufficient evidence to support a specific cause or to choose between poor and acceptable QoE."", ""prediction"": ""abstain"", ""recommended_operator_checks"": [""Review the current MOS, packet loss, and throughput relative to the configured bitrate before acting."", ""Collect another observation to determine whether the mixed indicators persist.""], ""summary"": ""The system withholds a next-observation QoE classification because the reliability evidence is insufficient for a committed prediction.""}",[],Ahmed,1,1,0,0,OK
