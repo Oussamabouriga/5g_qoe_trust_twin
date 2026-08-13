@@ -676,6 +676,37 @@ retrospective lead-time information.
 
 ## 18. Publication material
 
+Regenerate the report tables and figures from the authoritative frozen JSON:
+
+```bash
+python scripts/generate_report_assets.py
+```
+
+The generator validates consistency across final evaluation, three-model
+comparison, calibration selection, split provenance, and the retained 30-case
+human review before overwriting publication tables. This prevents stale values
+from an earlier experiment from appearing in the report.
+
+Build and audit the final IEEE PDF with Tectonic:
+
+```bash
+python scripts/build_report.py
+```
+
+If Tectonic is not on `PATH`, pass its executable explicitly:
+
+```bash
+python scripts/build_report.py --tectonic /path/to/tectonic
+```
+
+The build fails if the body before References exceeds 15 pages, required
+sections or headline metrics are absent, or superseded metrics are detected.
+The final PDF is written to:
+
+```text
+output/pdf/ieee_report_Bouriga_BenAissa_final.pdf
+```
+
 Use the frozen experiment and validated explanation-review artifacts directly:
 
 ```text
@@ -711,6 +742,9 @@ python scripts/generate_batch_explanations.py \
 python scripts/generate_batch_explanations.py --import-completed-jsonl
 # Review manual_review_template.csv and save final_manual_review.csv, then:
 python scripts/evaluate_llm.py
+
+python scripts/generate_report_assets.py
+python scripts/build_report.py
 
 python -m pytest -v
 ```
@@ -756,6 +790,7 @@ python scripts/evaluate_llm.py
 | Human-evaluation metrics | `results/metrics/llm_human_evaluation.json` |
 | Human-evaluation table | `results/tables/llm_human_evaluation.csv` |
 | Final figures | `results/figures/` |
+| Final audited IEEE report | `output/pdf/ieee_report_Bouriga_BenAissa_final.pdf` |
 
 ---
 

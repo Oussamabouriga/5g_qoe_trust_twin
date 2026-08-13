@@ -1,0 +1,99 @@
+{
+  "authoritative_inputs": [
+    {
+      "path": "results/metrics/final_final_evaluation.json",
+      "sha256": "083f567b53098d321705a58f86337416b43d31548a594f150ccbc054cef1d3fc"
+    },
+    {
+      "path": "results/metrics/final_model_comparison.json",
+      "sha256": "e4aae1b161a13af80d1e6f25627ad565e03f90ee0d098194d1d6445fa06fadea"
+    },
+    {
+      "path": "results/metrics/selected_calibration_configuration_final.json",
+      "sha256": "0033f9b5b31e93cf75c39c271113458a1c44277772d0cc1f1f1193986ec1d0ef"
+    },
+    {
+      "path": "results/metrics/llm_human_evaluation.json",
+      "sha256": "224bddd1bca28fe1d0cf70993db45a64d1f795bf797107c6b4bc5563abf2e76c"
+    },
+    {
+      "path": "manifests/cp6_sample_split_manifest.json",
+      "sha256": "868271c3fbe31fee92c06768aa73e0e7707ee7fc7199b65777a220bce4905044"
+    }
+  ],
+  "generated_outputs": [
+    {
+      "path": "report/generated/architecture.pdf",
+      "sha256": "abaa2d993ece5bdc788f8bfe6af1a3fd1339a615224cf88d540bf0aab2227f84"
+    },
+    {
+      "path": "report/generated/architecture.png",
+      "sha256": "991b43017c84d312697d9af77a2365ae822e4e1d9ca8ab12991a6731d25dfb5a"
+    },
+    {
+      "path": "report/generated/feature_importance.pdf",
+      "sha256": "bfc3aa2f898a9b443b93abcc1a1dafbc58f43daa0803bcbe627e90e02c773e32"
+    },
+    {
+      "path": "report/generated/feature_importance.png",
+      "sha256": "67bb8d4f5019a8329848f7f7e5ad33f33e08394beef1a326ed20d34c3e6e350a"
+    },
+    {
+      "path": "report/generated/lead_time_summary.pdf",
+      "sha256": "d1e7e3722f0db4ba61896ce32c56d60e7cafa2620dfa039db88816915e02ec34"
+    },
+    {
+      "path": "report/generated/lead_time_summary.png",
+      "sha256": "376ee43d5904434ad703c62f6e4752b6b285a8a4fd7a58965927c16a1cd8821a"
+    },
+    {
+      "path": "report/generated/llm_validation.pdf",
+      "sha256": "d7ffa72fa24f28226eadc7aaf9e434794230d304b7c56c80d93cffb9d950f93d"
+    },
+    {
+      "path": "report/generated/llm_validation.png",
+      "sha256": "c3043cadda275fb10465d540e9be4cc5eed9acafa61fad2abb29f26361b2d13c"
+    },
+    {
+      "path": "report/generated/model_comparison.pdf",
+      "sha256": "5861cfec9cf9c1507bfe4b2580e2760903c2c45fc91dfc246dbddf7d714bd6e8"
+    },
+    {
+      "path": "report/generated/model_comparison.png",
+      "sha256": "a4558c6faf31b1961a19768682882ba8129e6b2f7e3cde74d2a2eb1fc0446a3b"
+    },
+    {
+      "path": "report/generated/report_numbers.tex",
+      "sha256": "79878cf3c04c1de3fcc7c6c38d833a868549ec06d34e2ad317783f238c56498f"
+    },
+    {
+      "path": "report/generated/selective_performance.pdf",
+      "sha256": "0f1c68df97f2f4cd41ad2eb733f95dea6864c71ae51abe3e5bff7571604afe35"
+    },
+    {
+      "path": "report/generated/selective_performance.png",
+      "sha256": "30e45d854b14dbdfb5aa4e8ff80755aea040f676c45361bd83fcd6e2930ab350"
+    },
+    {
+      "path": "report/generated/table_calibration.tex",
+      "sha256": "cacf3b92bfc632604ad444b68a4612e354162169a140825c187d1a49802115ab"
+    },
+    {
+      "path": "report/generated/table_dataset.tex",
+      "sha256": "b88d3b6e9850cc64c08143fca616fc68e7ae17c2a69ebd476107575b070786db"
+    },
+    {
+      "path": "report/generated/table_final.tex",
+      "sha256": "ce3f3e26f2c3fa299b630a851c1277fca03f7a2a085fda61d8234c25df212b69"
+    },
+    {
+      "path": "report/generated/table_llm.tex",
+      "sha256": "c562a64e3b6870aae57a0b3d71c02f160231ceb5d93ed5252a13728b04bdde49"
+    },
+    {
+      "path": "report/generated/table_models.tex",
+      "sha256": "7f8b6905d5c8e0d4c3fddb1a83e4133ea5204d6cd9d648c78d3f16528a5c194a"
+    }
+  ],
+  "schema_version": 1
+}

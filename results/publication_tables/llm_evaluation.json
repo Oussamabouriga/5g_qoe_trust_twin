@@ -1,13 +1,10 @@
 {
-  "requested_cases": 30,
-  "generated_cases": 30,
+  "complete_cases": 30,
+  "contradiction_cases": 0,
+  "factual_correct_cases": 30,
+  "grounding_valid_cases": 30,
+  "reviewed_cases": 30,
+  "reviewer_count": 1,
   "schema_valid_cases": 30,
-  "schema_valid_rate": 1.0,
-  "grounding_valid_cases": 29,
-  "grounding_pass_rate": 0.9666666666666667,
-  "accepted_cases": 29,
-  "rejected_cases": 1,
-  "acceptance_rate": 0.9666666666666667,
-  "mean_latency_seconds": 2.8706430916665946,
-  "median_latency_seconds": 2.458567707999464
+  "unsupported_statement_cases": 0
 }

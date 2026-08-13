@@ -70,3 +70,10 @@ report/*.toc
 report/*.bbl
 report/*.blg
 report/*.synctex.gz
+
+# Local build tools and scratch files
+tmp/
+
+# Keep the final audited report, ignore other generated PDFs in output
+output/pdf/*
+!output/pdf/ieee_report_Bouriga_BenAissa_final.pdf

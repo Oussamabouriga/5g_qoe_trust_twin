@@ -20,23 +20,23 @@
   },
   "network_logistic": {
     "calibration_method": "isotonic",
-    "decision_threshold": 0.35000000000000003,
+    "decision_threshold": 0.3500000000000001,
     "f1": 0.6669995123423821,
     "pr_auc": 0.6297264086331162,
-    "brier_score": 0.188643040361495,
-    "expected_calibration_error": 0.012425270322566403
+    "brier_score": 0.18864304036150611,
+    "expected_calibration_error": 0.01242527032252707
   },
   "cross_layer_random_forest": {
     "calibration_method": "isotonic",
     "decision_threshold": 0.37000000000000005,
-    "f1": 0.8679872278329216,
-    "pr_auc": 0.9462698351013165,
-    "brier_score": 0.0740676687325214,
-    "expected_calibration_error": 0.012073271253851669,
-    "abstention_threshold": 0.6711849773025693,
+    "f1": 0.8680131381813991,
+    "pr_auc": 0.946174063939789,
+    "brier_score": 0.07407373918461496,
+    "expected_calibration_error": 0.012396437528937423,
+    "abstention_threshold": 0.670911977555425,
     "abstention_minimum_coverage": 0.9,
-    "abstention_validation_coverage": 0.902003290643899,
-    "abstention_validation_selective_accuracy": 0.9315232261483664,
-    "abstention_validation_selective_risk": 0.06847677385163366
+    "abstention_validation_coverage": 0.900624777659196,
+    "abstention_validation_selective_accuracy": 0.932122005110291,
+    "abstention_validation_selective_risk": 0.06787799488970905
   }
 }
