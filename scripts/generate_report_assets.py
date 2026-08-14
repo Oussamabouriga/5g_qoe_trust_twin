@@ -488,6 +488,7 @@ def write_macros(
     accepted = metrics["accepted_metrics"]
     trust = metrics["trust_summary"]
     lead = metrics["lead_time_statistics"]
+    persistence, network_logistic, cross_layer_rf = metrics["three_model_test_metrics"]
     rf_selection = calibration["cross_layer_random_forest"]
     macros = {
         "SampleRows": f"{int(split_manifest['input']['rows']):,}",
@@ -506,8 +507,24 @@ def write_macros(
         "RFROCAUC": fmt4(overall["roc_auc"]),
         "RFBrier": fmt4(overall["brier_score"]),
         "RFECE": fmt4(overall["expected_calibration_error"]),
+        "TrueNegatives": f"{int(overall['true_negatives']):,}",
         "FalsePositives": f"{int(overall['false_positives']):,}",
+        "FalseNegatives": f"{int(overall['false_negatives']):,}",
+        "TruePositives": f"{int(overall['true_positives']):,}",
         "FalseAlarmRate": f"{100 * float(overall['false_alarm_rate']):.2f}\\%",
+        "MissRate": f"{100 * float(overall['miss_rate']):.2f}\\%",
+        "FoneVsPersistence": (
+            f"{float(cross_layer_rf['f1']) - float(persistence['f1']):.4f}"
+        ),
+        "FoneVsNetwork": (
+            f"{float(cross_layer_rf['f1']) - float(network_logistic['f1']):.4f}"
+        ),
+        "PRAUCVsPersistence": (
+            f"{float(cross_layer_rf['pr_auc']) - float(persistence['pr_auc']):.4f}"
+        ),
+        "PRAUCVsNetwork": (
+            f"{float(cross_layer_rf['pr_auc']) - float(network_logistic['pr_auc']):.4f}"
+        ),
         "MeanLead": f"{float(lead['mean_seconds']):.3f}",
         "MedianLead": f"{float(lead['median_seconds']):.3f}",
         "PninetyfiveLead": f"{float(lead['p95_seconds']):.3f}",
@@ -518,8 +535,13 @@ def write_macros(
         "AcceptedPrecision": fmt4(accepted["precision"]),
         "AcceptedRecall": fmt4(accepted["recall"]),
         "AcceptedFone": fmt4(accepted["f1"]),
+        "AcceptedBrier": fmt4(accepted["brier_score"]),
+        "AcceptedECE": fmt4(accepted["expected_calibration_error"]),
         "DecisionThreshold": f"{float(rf_selection['decision_threshold']):.2f}",
-        "TrustThreshold": f"{float(rf_selection['abstention_threshold']):.6f}",
+        "TrustThreshold": f"{float(rf_selection['abstention_threshold']):.16f}",
+        "ValidationCoverage": (
+            f"{100 * float(rf_selection['abstention_validation_coverage']):.2f}\\%"
+        ),
     }
     lines = [
         rf"\newcommand{{\{name}}}{{{value}\xspace}}" for name, value in macros.items()
@@ -642,7 +664,8 @@ def generate_figures(
     )
     axis.set_ylim(0.80, 0.96)
     axis.set_xticks(x, measure_labels)
-    axis.set_title("Selective prediction at 90.40% coverage")
+    coverage_percent = 100 * float(metrics["trust_summary"]["coverage"])
+    axis.set_title(f"Selective prediction at {coverage_percent:.2f}% coverage")
     axis.legend(frameon=False, loc="lower right")
     style_axis(axis)
     fig.tight_layout()

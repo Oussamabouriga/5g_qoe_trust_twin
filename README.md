@@ -82,28 +82,28 @@ All three models were evaluated on the same 179,328 sealed test rows:
 |---|---:|---:|---:|---:|---:|---:|
 | Persistence | 0.8675 | 0.8403 | 0.7719 | 0.8637 | 0.1325 | 0.1325 |
 | Network Logistic Regression | 0.6749 | 0.6784 | 0.6459 | 0.7607 | 0.1941 | 0.0216 |
-| Cross-layer Random Forest | **0.9018** | **0.8807** | **0.9549** | **0.9637** | **0.0715** | **0.0116** |
+| Cross-layer Random Forest | **0.9012** | **0.8804** | **0.9548** | **0.9637** | **0.0715** | **0.0119** |
 
 Final calibrated Random Forest results:
 
 | Metric | All predictions | Accepted predictions |
 |---|---:|---:|
-| Accuracy | 0.9018 | 0.9340 |
-| Precision | 0.8860 | 0.9299 |
-| Recall | 0.8755 | 0.9091 |
-| F1-score | 0.8807 | 0.9194 |
-| PR-AUC | 0.9549 | 0.9680 |
-| ROC-AUC | 0.9637 | 0.9745 |
-| Brier score | 0.0715 | 0.0542 |
-| Expected Calibration Error | 0.0116 | 0.0090 |
+| Accuracy | 0.9012 | 0.9344 |
+| Precision | 0.8827 | 0.9305 |
+| Recall | 0.8780 | 0.9095 |
+| F1-score | 0.8804 | 0.9199 |
+| PR-AUC | 0.9548 | 0.9681 |
+| ROC-AUC | 0.9637 | 0.9747 |
+| Brier score | 0.0715 | 0.0540 |
+| Expected Calibration Error | 0.0119 | 0.0095 |
 
 Trust results:
 
-- validation-selected abstention threshold: **0.671185**;
-- test coverage: **90.40%**;
-- test abstention rate: **9.60%**;
-- accepted-decision accuracy: **93.40%**;
-- accepted-decision selective risk: **6.60%**.
+- validation-selected abstention threshold: **0.670912**;
+- test coverage: **90.31%**;
+- test abstention rate: **9.69%**;
+- accepted-decision accuracy: **93.44%**;
+- accepted-decision selective risk: **6.56%**.
 
 The trust score is a heuristic reliability score, not a probability of
 correctness.
@@ -576,8 +576,8 @@ correct.
 
 The abstention threshold was selected using only validation
 predictions, minimizing selective risk subject to at least 90% coverage. The
-frozen threshold was `0.6711849773025693`; it achieved 90.20% coverage on the
-selection half and 90.40% coverage on the sealed test set. Trust-level labels
+frozen threshold was `0.670911977555425`; it achieved 90.06% coverage on the
+selection half and 90.31% coverage on the sealed test set. Trust-level labels
 are descriptive and do not substitute for the validation-selected abstention
 decision.
 

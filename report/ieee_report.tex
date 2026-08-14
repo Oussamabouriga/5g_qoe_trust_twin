@@ -33,7 +33,7 @@ Aivancity School for Technology, Business \& Society, Cachan, France}
 \maketitle
 
 \begin{abstract}
-This paper presents and audits a scientifically scoped, trace-driven Digital
+This paper presents a scientifically scoped, trace-driven Digital
 Twin for video-streaming Quality of Experience (QoE) forecasting in 5G New
 Radio.  The prototype chronologically replays public 5G-QoERA observations,
 maintains network and service state, predicts whether the next observation has
@@ -107,8 +107,8 @@ The contributions are:
       selective abstention;
 \item a schema-constrained, evidence-grounded explanation layer that is
       separated from prediction and control; and
-\item a reproducibility audit that regenerates every number in this report
-      from authoritative frozen JSON rather than the superseded submission.
+\item a reproducible reporting workflow that regenerates every result in this
+      paper from validated experiment artifacts.
 \end{itemize}
 
 \section{State of the Art}
@@ -183,7 +183,7 @@ only after schema and grounding validation.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.98\textwidth]{architecture.pdf}
-\caption{Audited architecture.  The language model is downstream of the
+\caption{Prototype architecture.  The language model is downstream of the
 prediction and trust decision and cannot modify either.}
 \label{fig:architecture}
 \end{figure*}
@@ -203,7 +203,8 @@ The twin contains the four mandatory elements:
       trust score, level, and abstention decision.
 \end{enumerate}
 
-The study is independent and trace-driven.  A row represents one bitrate
+The study is offline and trace-driven.  Observations are correlated and are
+not statistically independent.  A row represents one bitrate
 alternative attached to a physical radio observation; the prototype studies
 \PhysicalObservations physical observations and \SampleSessions reconstructed
 sessions rather than claiming that the dataset contains millions of distinct
@@ -224,7 +225,7 @@ sample of \SampleRows rows.  It retains complete sessions and covers every
 base-station, PRB, and selected-bitrate group.  The sample is authenticated by
 SHA-256, checked against all 32 trusted raw files, and then stripped of
 inherited session and target fields.  Sessions and labels are reconstructed
-from base measurements.  This audit found zero missing source rows, zero value
+from base measurements.  Verification found zero missing source rows, zero value
 mismatches in throughput, position, packet loss, or MOS, and zero duplicate row
 identities.  After removing \SampleSessions terminal rows and 192 labels that
 cross chronological boundaries, \FinalRows labelled rows remain.
@@ -299,7 +300,10 @@ All learned preprocessing is fitted on training rows only.
 
 The comparison separates the value of cross-layer state from persistence and
 from a network-only linear model.  No test labels are used in fitting,
-calibration, or threshold selection.
+calibration, or threshold selection.  Final training, calibration, inference,
+and evaluation use the same
+\texttt{cross\_layer\_random\_forest\_final.joblib} artifact and validate the
+complete model $\rightarrow$ calibrator $\rightarrow$ prediction lineage.
 
 \subsection{Calibration and Operating-Point Selection}
 
@@ -351,7 +355,7 @@ Prediction stability is retained as a diagnostic field but, by design, has no
 weight in Equation~\ref{eq:trust}.  The trust score is a ranking heuristic,
 not $P(\mathrm{correct})$.  On the later validation half, the abstention
 threshold minimizes selective risk subject to at least 90\% coverage.  The
-frozen value \TrustThreshold achieves 90.20\% validation coverage and is then
+frozen value \TrustThreshold achieves \ValidationCoverage validation coverage and is then
 applied unchanged to test.
 
 \subsection{Grounded LLM Component}
@@ -374,7 +378,7 @@ report deliberately makes no provider/model attribution.
 
 \section{Actions Performed and Software Implementation}
 
-The implementation work proceeded through the following auditable actions:
+The implementation work proceeded through the following actions:
 
 \begin{enumerate}
 \item inspected the 32 public scenarios and normalized selected application
@@ -389,9 +393,9 @@ The implementation work proceeded through the following auditable actions:
 \item fitted sigmoid and isotonic calibration on the first validation half and
       selected calibration, decision, and abstention thresholds on the second;
 \item evaluated the frozen models once on the sealed test period;
-\item exported 30 balanced explanation cases (10 accepted poor-QoE, 10 accepted
-      acceptable-QoE, and 10 abstentions), validated completions, and completed
-      one-person manual review;
+\item retained and revalidated a repository batch of 30 balanced explanation
+      cases (10 accepted poor-QoE, 10 accepted acceptable-QoE, and 10
+      abstentions) with completed one-person manual review;
 \item added unit, causality, parity, lineage, grounding, and artifact-contract
       tests; and
 \item replaced stale publication tables with a generator that checks five
@@ -433,16 +437,16 @@ on the sealed test period.}
 
 The final Random Forest yields accuracy \RFAccuracy, precision \RFPrecision,
 recall \RFRecall, F1 \RFFone, PR-AUC \RFPRAUC, ROC-AUC \RFROCAUC, Brier
-\RFBrier, and ECE \RFECE.  Its confusion matrix contains 96,671 true negatives,
-\FalsePositives false positives, 9,250 false negatives, and 65,042 true
+\RFBrier, and ECE \RFECE.  Its confusion matrix contains \TrueNegatives true negatives,
+\FalsePositives false positives, \FalseNegatives false negatives, and \TruePositives true
 positives.  Thus the false-alarm rate is \FalseAlarmRate and the miss rate is
-12.45\%.  Reporting both counts and rates avoids hiding the operational burden
+\MissRate.  Reporting both counts and rates avoids hiding the operational burden
 created by a large test set.
 
 The model comparison supports the cross-layer hypothesis.  The Random Forest
-improves F1 by 0.0405 over persistence and by 0.2023 over network-only Logistic
-Regression.  Its PR-AUC exceeds persistence by 0.1830 and the network-only
-model by 0.3090.  Because the test positive rate is \TestPoorRate, PR-AUC is
+improves F1 by \FoneVsPersistence over persistence and by \FoneVsNetwork over network-only Logistic
+Regression.  Its PR-AUC exceeds persistence by \PRAUCVsPersistence and the network-only
+model by \PRAUCVsNetwork.  Because the test positive rate is \TestPoorRate, PR-AUC is
 more informative than accuracy alone.
 
 \subsection{Calibration and the Research Question}
@@ -468,7 +472,7 @@ Applying the validation-selected threshold abstains on \AbstainedCount of
 and Figure~\ref{fig:selective} show the resulting trade-off.  Accepted accuracy
 rises from \RFAccuracy to \AcceptedAccuracy; accepted precision is
 \AcceptedPrecision, recall \AcceptedRecall, and F1 \AcceptedFone.  Accepted
-Brier score and ECE also improve to 0.0542 and 0.0090.
+Brier score and ECE also improve to \AcceptedBrier and \AcceptedECE.
 
 \begin{table}[t]
 \caption{Overall versus accepted test decisions}
@@ -604,7 +608,7 @@ earliest-time group-balanced sample rather than the complete 16.59-million-row
 long table.  Raw compatibility and byte identity are strong, but the historical
 command that produced the sample is unavailable.  It should therefore remain
 labelled a quarantined external snapshot.  The result is scientifically
-auditable but not fully regenerable from the public raw data alone without a
+traceable but not fully regenerable from the public raw data alone without a
 new declared sampling policy and new results.
 
 \textbf{Dependence and generalization:} bitrate alternatives share radio
@@ -657,52 +661,12 @@ The following actions would materially strengthen the work:
       resource-allocation experiments, while keeping the LLM outside the
       control loop;
 \item strengthen grounding with semantic entailment checks, unit ontologies,
-      allow-listed causal templates, adversarial prompts, and rejection audits;
+      allow-listed causal templates, adversarial prompts, and rejection tests;
       and
 \item retain provider/model/version/request metadata and conduct blinded review
       with multiple network-domain operators, reporting inter-rater agreement
       and usefulness/actionability scores.
 \end{enumerate}
-
-\section{Requirement Compliance Audit}
-
-Table~\ref{tab:audit} maps the assignment to implemented, testable evidence.
-All mandatory prototype and report elements pass.  The raw-to-final rerun
-limitation is disclosed as a reproducibility improvement rather than hidden.
-
-\begin{table*}[t]
-\caption{Final requirement audit}
-\label{tab:audit}
-\centering
-\small
-\begin{tabular}{p{0.26\textwidth}p{0.62\textwidth}c}
-\toprule
-Requirement & Audited evidence & Status \\
-\midrule
-IEEE paper, $\leq$15 pages excluding references & IEEEtran two-column source;
-state of the art, work, methodology, actions, results, limitations, and
-improvements are explicit; build-time page audit included & Pass \\
-Commented code & Typed modules and scripts contain docstrings and comments for
-temporal, calibration, trust, evidence, and grounding logic & Pass \\
-Chronological replay & Global timestamp/session ordering, per-session state,
-replay-parity and future-invariance tests & Pass \\
-Network/service state & Throughput, base station, PRB, location/mobility,
-packet loss, bitrate, resolution, current MOS, and temporal state & Pass \\
-Future event and horizon & $\mos_{t+1}<3.0$ within session; one-step interval
-reported with timing statistics & Pass \\
-Required model comparison & Persistence, network-only Logistic Regression, and
-cross-layer Random Forest on identical test rows & Pass \\
-Calibrated best model & Sigmoid/isotonic compared on validation; isotonic RF
-selected and frozen before test & Pass \\
-Required evaluation & F1, PR-AUC, Brier, ECE, false alarms, and observed
-prediction interval all reported & Pass \\
-Confidence/trust & Calibrated probability, heuristic trust score, levels,
-validation-selected abstention and coverage & Pass \\
-Grounded LLM & Structured evidence, event/cause/confidence/limitations/operator
-checks, strict schema and deterministic no-invention validation & Pass \\
-\bottomrule
-\end{tabular}
-\end{table*}
 
 \section{Conclusion}
 
@@ -729,7 +693,6 @@ This project was conducted in the PGE 5 Artificial Intelligence and Data
 Science program at Aivancity School for Technology, Business \& Society.
 
 \bibliographystyle{IEEEtran}
-\clearpage
 \bibliography{references/references}
 
 \end{document}

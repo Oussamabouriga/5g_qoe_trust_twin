@@ -14,7 +14,7 @@
     },
     {
       "path": "results/metrics/llm_human_evaluation.json",
-      "sha256": "224bddd1bca28fe1d0cf70993db45a64d1f795bf797107c6b4bc5563abf2e76c"
+      "sha256": "dae63769aac1a1aba7ff86d82039be063993f46c22bc19475cc0c66c9c534c48"
     },
     {
       "path": "manifests/cp6_sample_split_manifest.json",
@@ -24,7 +24,7 @@
   "generated_outputs": [
     {
       "path": "report/generated/architecture.pdf",
-      "sha256": "abaa2d993ece5bdc788f8bfe6af1a3fd1339a615224cf88d540bf0aab2227f84"
+      "sha256": "7468e3f8ae4a73681fd2324c00d8b2ec50f207269bd78688bce0e84b55962b97"
     },
     {
       "path": "report/generated/architecture.png",
@@ -32,7 +32,7 @@
     },
     {
       "path": "report/generated/feature_importance.pdf",
-      "sha256": "bfc3aa2f898a9b443b93abcc1a1dafbc58f43daa0803bcbe627e90e02c773e32"
+      "sha256": "f26f41a59832cf4db257da2189679727480b7e2de805c9678105534fcd3fd9fe"
     },
     {
       "path": "report/generated/feature_importance.png",
@@ -40,7 +40,7 @@
     },
     {
       "path": "report/generated/lead_time_summary.pdf",
-      "sha256": "d1e7e3722f0db4ba61896ce32c56d60e7cafa2620dfa039db88816915e02ec34"
+      "sha256": "1f789ba9dafa9ee9d70f66bcb712787928c4fe09765e5970df74426d1643d95e"
     },
     {
       "path": "report/generated/lead_time_summary.png",
@@ -48,7 +48,7 @@
     },
     {
       "path": "report/generated/llm_validation.pdf",
-      "sha256": "d7ffa72fa24f28226eadc7aaf9e434794230d304b7c56c80d93cffb9d950f93d"
+      "sha256": "05294cee759a746d2d59ebcd0ba68c7e0872a997bcae675b96feed03cd28e3fd"
     },
     {
       "path": "report/generated/llm_validation.png",
@@ -56,7 +56,7 @@
     },
     {
       "path": "report/generated/model_comparison.pdf",
-      "sha256": "5861cfec9cf9c1507bfe4b2580e2760903c2c45fc91dfc246dbddf7d714bd6e8"
+      "sha256": "7c546036c0c9405de7126c879471150288e9b66a43d96845d8a725b601a38fff"
     },
     {
       "path": "report/generated/model_comparison.png",
@@ -64,11 +64,11 @@
     },
     {
       "path": "report/generated/report_numbers.tex",
-      "sha256": "79878cf3c04c1de3fcc7c6c38d833a868549ec06d34e2ad317783f238c56498f"
+      "sha256": "5ee043e823a50d153f741b12927e57f37286eea40289dc4bbbef4ffc09ef13f4"
     },
     {
       "path": "report/generated/selective_performance.pdf",
-      "sha256": "0f1c68df97f2f4cd41ad2eb733f95dea6864c71ae51abe3e5bff7571604afe35"
+      "sha256": "c21ff92a918e8ac64ee3b7bde585e47ef6ef405e57eeb49f3de304fd9d1baa83"
     },
     {
       "path": "report/generated/selective_performance.png",

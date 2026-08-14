@@ -73,7 +73,6 @@ def test_report_source_has_required_sections_and_no_stale_claims() -> None:
         "Actions Performed and Software Implementation",
         "Results",
         "Suggestions for Improvement",
-        "Requirement Compliance Audit",
     ):
         assert f"\\section{{{section}}}" in source
 

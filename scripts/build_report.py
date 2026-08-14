@@ -71,13 +71,17 @@ def audit_pdf(path: Path) -> tuple[int, int]:
         raise ValueError("Compiled report contains unexpectedly little text.")
 
     references_page = None
+    references_starts_page = False
     for index, text in enumerate(page_text, start=1):
-        if text.lstrip().lower().startswith("references\n"):
+        lines = [line.strip().lower() for line in text.splitlines()]
+        if "references" in lines:
             references_page = index
+            references_starts_page = text.lstrip().lower().startswith("references\n")
             break
     if references_page is None:
         raise ValueError("Compiled report does not contain a References section.")
-    body_pages = references_page - 1
+    # Count a mixed body/references page conservatively as a body page.
+    body_pages = references_page - 1 if references_starts_page else references_page
     if body_pages > 15:
         raise ValueError(f"Report body has {body_pages} pages; the maximum is 15.")
 
@@ -88,13 +92,14 @@ def audit_pdf(path: Path) -> tuple[int, int]:
         "Actions Performed and Software Implementation",
         "Results",
         "Suggestions for Improvement",
-        "Requirement Compliance Audit",
         "0.8807",
         "0.9549",
         "0.0715",
         "0.0116",
         "8,365",
-        "9.60%",
+        "17,212",
+        "90.40%",
+        "0.6711849773025693",
         "30 (100%)",
     )
     missing = [phrase for phrase in required_phrases if phrase not in combined]
@@ -147,7 +152,7 @@ def main() -> None:
     audit_pdf(OUTPUT)
 
     print(f"Built: {OUTPUT.relative_to(ROOT)}")
-    print(f"Pages: {page_count} total; {body_pages} before References")
+    print(f"Pages: {page_count} total; {body_pages} body pages (conservative)")
 
 
 if __name__ == "__main__":

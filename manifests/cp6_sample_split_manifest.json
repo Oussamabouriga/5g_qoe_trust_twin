@@ -20,12 +20,12 @@
     "Four bitrate rows share each physical radio observation and are not independent."
   ],
   "output": {
-    "byte_size": 9332747,
+    "byte_size": 9349609,
     "columns": 46,
     "path": "data/processed/qoe_features_final.parquet",
     "rows": 897056,
     "schema_sha256": "102a0ecd13e279f33023c3f344cb7268bd036cd31b108cb0fd21a2ff6c5b8cb5",
-    "sha256": "41d6a82dd40ffcd071962b5abef64c50b373ec4dbea86ad48d7d86ca1afa89f2"
+    "sha256": "7a4bf7ebe0cb2e94701638880b7aa06942d7ccf7cfd0d5241a20a187a37a0e76"
   },
   "policies": {
     "bitrate_to_resolution": {
